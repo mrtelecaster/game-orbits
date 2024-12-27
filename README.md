@@ -1,0 +1,28 @@
+# Game Orbits Library
+
+Library for turning the orbital data of celestial objects into position and
+direction vectors that can be used in a game engine for rendering from different
+frames of reference.
+
+This library is built to be completely game engine agnostic. It provides
+functions needed to feed it various orbital data as floats, and receive vectors
+back representing positions and directions in game engine space from various
+frames of reference. The intention is to also write a wrapper library for godot
+in order to use this for a personal project of mine in the Godot engine, but it
+should be theoretically possible to use this in any engine that allows you to
+write a wrapper library around rust code or binaries.
+
+This library may also be expanded with additional functionality for things like
+generating meshes at runtime for different texture projections, and tools for
+projecting astrometric data from NASA and other organizations into textures for
+use in games.
+
+## Tests
+
+Due to a limitation of `cargo` combined with the fact that I use the Bevy engine
+to render my examples, unit tests require compiling bevy to run. This won't
+include Bevy or require Bevy for any projects that use this library, as bevy is
+only compiled in the `dev` profile when running examples or tests, but it does
+mean the first time compiling unit tests will take a significant amount of time
+as it compiles Bevy along with the tests. Building the library itself or its
+documentation should be quite fast.
