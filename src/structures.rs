@@ -1,27 +1,27 @@
 //! Data structures used by the library
 
-use crate::constants;
+use crate::{Float, constants};
 
 
 /// Keplerian elements that define an orbit
 pub struct OrbitalElements {
     /// Semi-major axis, *a*
-    semimajor_axis: f64,
+    semimajor_axis: Float,
     /// Eccentricity, *e*
-    eccentricity: f64,
+    eccentricity: Float,
     /// Inclination, *i*
-    inclination: f64,
+    inclination: Float,
     /// Argument of Periapsis, *ω*
-    arg_of_periapsis: f64,
+    arg_of_periapsis: Float,
     /// Time of Periapsis Passage, *T*
-    time_of_periapsis_passage: f64,
+    time_of_periapsis_passage: Float,
     /// Longitude of Ascending Node, *Ω*
-    long_of_ascending_node: f64,
+    long_of_ascending_node: Float,
 }
 impl OrbitalElements {
     pub fn new(
-        semimajor_axis: f64, eccentricity: f64, inclination: f64, arg_of_periapsis: f64,
-        time_of_periapsis_passage: f64, long_of_ascending_node: f64,
+        semimajor_axis: Float, eccentricity: Float, inclination: Float, arg_of_periapsis: Float,
+        time_of_periapsis_passage: Float, long_of_ascending_node: Float,
     ) -> Self {
         Self{
             semimajor_axis, eccentricity, inclination, arg_of_periapsis,
@@ -33,32 +33,33 @@ impl OrbitalElements {
 
 /// A body in space represented as an idealized sphere
 pub struct Body {
-    mass_kg: f64,
-    radius_km: f64,
+    mass_kg: Float,
+    radius_km: Float,
 }
 impl Body
 {
     /// Create a new body with the given mass and radius properties
-    pub fn new(mass_kg: f64, radius_km: f64) -> Self {
+    pub fn new(mass_kg: Float, radius_km: Float) -> Self {
         Self{ mass_kg: mass_kg.into(), radius_km }
     }
+    /// Create a new body with the properties of the planet [Earth](https://en.wikipedia.org/wiki/Earth)
     pub fn new_earth() -> Self {
         Self::new(constants::MASS_EARTH_KG, constants::RADIUS_EARTH_KM)
     }
     /// Gets the mass of this body in kilograms, *kg*
-    pub fn mass_kg(&self) -> f64 {
+    pub fn mass_kg(&self) -> Float {
         self.mass_kg
     }
     /// Gets the radius of this body in kilometers, *km*
-    pub fn radius_km(&self) -> f64 {
+    pub fn radius_km(&self) -> Float {
         self.radius_km
     }
     /// Gets the radius of this body in meters, *m*
-    pub fn radius_m(&self) -> f64 {
+    pub fn radius_m(&self) -> Float {
         self.radius_km * constants::CONVERT_KM_TO_M
     }
     /// Calculates the body's *GM*, its mass times the Gravitational Constant *G*
-    pub fn gm(&self) -> f64 {
+    pub fn gm(&self) -> Float {
         self.mass_kg * constants::G
     }
 }
