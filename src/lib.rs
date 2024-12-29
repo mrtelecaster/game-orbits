@@ -8,14 +8,15 @@
 //! or with an as-yet-unbuilt wrapper library for [the Godot engine](https://godotengine.org/)
 //! for a personal project of mine.
 //! 
-//! All of the math and terminology is based on [*Orbital Mechanics*](), a web
-//! article by Robert A. Braeunig
+//! All of the math and terminology is based on [*Orbital Mechanics*](http://www.braeunig.us/space/orbmech.htm),
+//! a web article by Robert A. Braeunig
 
 
 mod constants; pub use constants::*;
 mod structures; pub use structures::*;
 
 
+/// Defining this so that I can swap `f32` with `f64` and back to compare
 pub type Float = f32;
 
 
@@ -130,6 +131,79 @@ mod tests {
             let denominator = earth.gm();
             let e = numerator / denominator - 1.0;
             assert_ulps_eq!(0.01696, e, epsilon=0.000002);
+        }
+
+        /// [Problem 4.7](http://www.braeunig.us/space/problem.htm#4.7)
+        /// 
+        /// A satellite in earth's orbit has a semi-major axis of 6,700 km and
+        /// an eccentricity of 0.01. Calculate the satellite's altitude at both
+        /// perigee and apogee.
+        #[test]
+        fn problem_4_7() {
+            let a: Float = 6700.0;
+            let e: Float = 0.01;
+            let r_p: Float = a * (1.0 - e);
+            let r_a: Float = a * (1.0 + e);
+            assert_ulps_eq!(6633.0, r_p);
+            assert_ulps_eq!(6767.0, r_a);
+        }
+
+        /// [Problem 4.8](http://www.braeunig.us/space/problem.htm#4.8)
+        /// 
+        /// Calculate a satellite's perigee and apogee altitude from a given
+        /// position and velocity
+        #[test]
+        fn problem_4_8() {
+            let earth = Body::new_earth();
+            let r_1: Float = 6_628_140.0;
+            let v_1: Float = 7_900.0;
+            let angle_deg: Float = 89.0;
+            let angle_rad: Float = angle_deg * CONVERT_DEG_TO_RAD;
+            let c: Float = (2.0 * earth.gm()) / (r_1 * v_1.powi(2));
+            let sqrt = c.powi(2) - (4.0 * (1.0 - c) * -(angle_rad.sin().powi(2)));
+            let denominator = 2.0 * (1.0 - c);
+            let r_a = r_1 * (-c - sqrt.sqrt()) / denominator;
+            let r_p = r_1 * (-c + sqrt.sqrt()) / denominator;
+            let epsilon = 10.0;
+            assert_ulps_eq!(6_601_750.0, r_p, epsilon=epsilon);
+            assert_ulps_eq!(7_175_100.0, r_a, epsilon=epsilon);
+        }
+
+        /// [Problem 4.9](http://www.braeunig.us/space/problem.htm#4.9)
+        /// 
+        /// Calculate the eccentricity of the satellite from 4.8
+        #[test]
+        fn problem_4_9() {
+            let earth = Body::new_earth();
+            let r_1: Float = 6_628_140.0;
+            let v_1: Float = 7_900.0;
+            let angle_deg: Float = 89.0;
+            let angle_rad: Float = angle_deg * CONVERT_DEG_TO_RAD;
+            let sin: Float = angle_rad.sin().powi(2);
+            let cos: Float = angle_rad.cos().powi(2);
+            let sqrt: Float = (r_1 * v_1.powi(2) / earth.gm() - 1.0).powi(2) * sin + cos;
+            let e: Float = sqrt.sqrt();
+            assert_ulps_eq!(0.0416170, e, epsilon=0.00000005);
+        }
+
+        /// [Problem 4.10](http://www.braeunig.us/space/problem.htm#4.10)
+        /// 
+        /// Calculate the angle *ν* from the perigee point to launch point for
+        /// the stellite in problem 4.8
+        #[test]
+        fn problem_4_10() {
+            let earth = Body::new_earth();
+            let r_1: Float = 6_628_140.0;
+            let v_1: Float = 7_900.0;
+            let angle_deg: Float = 89.0;
+            let angle_rad: Float = angle_deg * CONVERT_DEG_TO_RAD;
+            let x = (r_1 * v_1.powi(2)) / earth.gm();
+            let sin = angle_rad.sin();
+            let cos = angle_rad.cos();
+            let tan_nu = (x * sin * cos) / (x * sin.powi(2) - 1.0);
+            let nu_rad = tan_nu.atan();
+            let nu_deg = nu_rad * CONVERT_RAD_TO_DEG;
+            assert_ulps_eq!(25.794, nu_deg);
         }
     }
 }
