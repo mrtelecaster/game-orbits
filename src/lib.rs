@@ -205,5 +205,42 @@ mod tests {
             let nu_deg = nu_rad * CONVERT_RAD_TO_DEG;
             assert_ulps_eq!(25.794, nu_deg);
         }
+
+		/// [Problem 4.11](http://www.braeunig.us/space/problem.htm#4.11)
+        /// 
+        /// Calculate the semi-major axis of the orbit for the satellite in problem 4.8
+        #[test]
+        fn problem_4_11() {
+            let earth = Body::new_earth();
+            let r_1: Float = 6_628_140.0;
+            let v_1: Float = 7_900.0;
+            let a: Float = 1.0 / (2.0 / r_1 - v_1.powi(2) / earth.gm());
+            assert_ulps_eq!(6_888_430.0, a);
+        }
+
+		/// [Problem 4.12](http://www.braeunig.us/space/problem.htm#4.12)
+        /// 
+        /// For the satellite in problem 4.8, burnout occurs 2000-10-20, 15:00 UT. The geocentric
+		/// coordinates at burnout are 32° N latitude, 60° W longitude, and the azimuth heading
+		/// is 86°.  Calculate the orbit's inclination, argument of perigee, and longitude of
+		/// ascending node.
+        #[test]
+        fn problem_4_12() {
+            let beta: Float = 86.0 * CONVERT_DEG_TO_RAD;
+			let delta: Float = 32.0 * CONVERT_DEG_TO_RAD;
+			let lambda_2: Float = -60.0 * CONVERT_DEG_TO_RAD;
+			let nu: Float = 25.794 * CONVERT_DEG_TO_RAD;
+			let epsilon_angle: Float = 0.0005;
+			let i: Float = (delta.cos() * beta.sin()).acos();
+            assert_ulps_eq!(32.223, i * CONVERT_RAD_TO_DEG, epsilon=epsilon_angle);
+			let iota: Float = (delta.tan() / beta.cos()).atan();
+			assert_ulps_eq!(83.630, iota * CONVERT_RAD_TO_DEG, epsilon=epsilon_angle);
+			let omega: Float = iota - nu;
+			assert_ulps_eq!(57.836, omega * CONVERT_RAD_TO_DEG, epsilon=epsilon_angle);
+			let d_lambda: Float = (delta.sin() * beta.tan()).atan();
+			assert_ulps_eq!(82.483, d_lambda * CONVERT_RAD_TO_DEG, epsilon=epsilon_angle);
+			let lambda_1: Float = lambda_2 - d_lambda;
+			assert_ulps_eq!(-142.483, lambda_1 * CONVERT_RAD_TO_DEG, epsilon=epsilon_angle);
+        }
     }
 }
