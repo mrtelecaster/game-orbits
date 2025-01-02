@@ -242,5 +242,54 @@ mod tests {
 			let lambda_1: Float = lambda_2 - d_lambda;
 			assert_ulps_eq!(-142.483, lambda_1 * CONVERT_RAD_TO_DEG, epsilon=epsilon_angle);
         }
+
+		/// [Problem 4.13](http://www.braeunig.us/space/problem.htm#4.13)
+        /// 
+        /// A satellite is in an orbit with a semi-major axis of 7,500 km and an eccentricity of
+		/// 0.1. Calculate the time it takes to move from a position 30 degrees past perigee to 90
+		/// degrees past perigee.
+        #[test]
+        fn problem_4_13() {
+			let earth: Body = Body::new(EARTH_MASS_KG, EARTH_RADIUS_KM);
+            let a: Float = 7_500_000.0;
+			let e: Float = 0.1;
+			let t_0: Float = 0.0;
+			let nu_0: Float = 30.0 * CONVERT_DEG_TO_RAD;
+			let nu: Float = 90.0 * CONVERT_DEG_TO_RAD;
+			let epsilon = 0.01;
+			let eccentric_anomaly_0: Float = ((e + nu_0.cos()) / (1.0 + e * nu_0.cos())).acos();
+			assert_ulps_eq!(0.47557, eccentric_anomaly_0, epsilon=epsilon);
+			let eccentric_anomaly: Float = ((e + nu.cos()) / (1.0 + e * nu_0.cos())).acos();
+			assert_ulps_eq!(1.47063, eccentric_anomaly, epsilon=epsilon);
+			let mean_anomaly_0: Float = eccentric_anomaly_0 - e * eccentric_anomaly_0.sin();
+			assert_ulps_eq!(0.42978, mean_anomaly_0, epsilon=epsilon);
+			let mean_anomaly: Float = eccentric_anomaly - e * eccentric_anomaly.sin();
+			assert_ulps_eq!(1.37113, mean_anomaly, epsilon=epsilon);
+			let n = (earth.gm() / a.powi(3)).sqrt();
+			assert_ulps_eq!(0.00097202, n, epsilon=0.000001);
+			let t = t_0 + (mean_anomaly - mean_anomaly_0) / n;
+			assert_ulps_eq!(968.4, t, epsilon=10.0);
+        }
+
+		/// [Problem 4.14](http://www.braeunig.us/space/problem.htm#4.14)
+        /// 
+        /// The satellite in problem 4.13 has a true anomaly of 90 degrees.  What will be the
+		/// satellite's position, i.e. it's true anomaly, 20 minutes later?
+        #[test]
+        fn problem_4_14() {
+			// let earth: Body = Body::new(EARTH_MASS_KG, EARTH_RADIUS_KM);
+            // let a: Float = 7_500_000.0;
+			let e: Float = 0.1;
+			let t_0: Float = 0.0;
+			let t: Float = 1200.0;
+			// let nu_0: Float = 30.0 * CONVERT_DEG_TO_RAD;
+			let mean_anomaly_0: Float = 1.37113;
+			let n: Float = 0.00097202;
+			let mean_anomaly: Float = mean_anomaly_0 + n * (t - t_0);
+			assert_ulps_eq!(2.53755, mean_anomaly, epsilon=0.000005);
+			// Low accuracy
+			let nu: Float = mean_anomaly + 2.0 * e * mean_anomaly.sin() + 1.25 * e.powi(2) * (2.0 * mean_anomaly).sin();
+			assert_ulps_eq!(2.63946, nu, epsilon=0.000002);
+        }
     }
 }
