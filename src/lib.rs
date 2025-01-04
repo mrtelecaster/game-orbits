@@ -291,5 +291,52 @@ mod tests {
 			let nu: Float = mean_anomaly + 2.0 * e * mean_anomaly.sin() + 1.25 * e.powi(2) * (2.0 * mean_anomaly).sin();
 			assert_ulps_eq!(2.63946, nu, epsilon=0.000002);
         }
+
+		/// [Problem 4.15](http://www.braeunig.us/space/problem.htm#4.15)
+        /// 
+        /// The satellite in problem 4.13 has a true anomaly of 90 degrees.  What will be the
+		/// satellite's position, i.e. it's true anomaly, 20 minutes later?
+        #[test]
+        fn problem_4_15() {
+			let earth: Body = Body::new_earth();
+			let a: Float = 7_500_000.0;
+			let e: Float = 0.1;
+			let nu: Float = 225.0 * CONVERT_DEG_TO_RAD;
+			let r: Float = a * (1.0 - e.powi(2)) / (1.0 + e * nu.cos());
+			assert_ulps_eq!(7_989_977.0, r);
+			let theta: Float = (e * nu.sin() / (1.0 + e * nu.cos())).atan();
+			assert_ulps_eq!(-4.351, theta * CONVERT_RAD_TO_DEG, epsilon=0.0005);
+			let v: Float = (earth.gm() * (2.0 / r - 1.0 / a)).sqrt();
+			assert_ulps_eq!(6828.0, v, epsilon=0.5);
+        }
+
+		/// [Problem 4.19](http://www.braeunig.us/space/problem.htm#4.19)
+        /// 
+        /// A spacecraft is in a circular parking orbit with an altitude of 200 km. Calculate the
+		/// velocity change required to perform a Hohmann transfer to a circular orbit at
+		/// geosynchronous altitude.
+        #[test]
+        fn problem_4_19() {
+			let earth: Body = Body::new_earth();
+			let r_a: Float = 6_578_140.0;
+			let r_b: Float = 42_164_170.0;
+			let a_tx: Float = (r_a + r_b) / 2.0;
+			assert_ulps_eq!(24_371_155.0, a_tx);
+			let v_epsilon = 2.0;
+			let v_i_a: Float = (earth.gm() / r_a).sqrt();
+			assert_ulps_eq!(7_784.0, v_i_a, epsilon=v_epsilon);
+			let v_f_b: Float = (earth.gm() / r_b).sqrt();
+			assert_ulps_eq!(3_075.0, v_f_b, epsilon=v_epsilon);
+			let v_tx_a: Float = (earth.gm() * (2.0 / r_a - 1.0 / a_tx)).sqrt();
+			assert_ulps_eq!(10_239.0, v_tx_a, epsilon=v_epsilon);
+			let v_tx_b: Float = (earth.gm() * (2.0 / r_b - 1.0 / a_tx)).sqrt();
+			assert_ulps_eq!(1_597.0, v_tx_b, epsilon=v_epsilon);
+			let delta_v_a: Float = v_tx_a - v_i_a;
+			assert_ulps_eq!(2_455.0, delta_v_a, epsilon=v_epsilon);
+			let delta_v_b: Float = v_f_b - v_tx_b;
+			assert_ulps_eq!(1_478.0, delta_v_b, epsilon=v_epsilon);
+			let delta_v_t: Float = delta_v_a + delta_v_b;
+			assert_ulps_eq!(3_933.0, delta_v_t, epsilon=v_epsilon);
+        }
     }
 }
