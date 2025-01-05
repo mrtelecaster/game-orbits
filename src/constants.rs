@@ -13,5 +13,6 @@ pub const CONVERT_DEG_TO_RAD: Float = TAU / 360.0;
 pub const CONVERT_RAD_TO_DEG: Float = 360.0 / TAU;
 pub const CONVERT_KM_TO_M: Float = 1000.0;
 
-pub const RADIUS_EARTH_KM: Float = 6371.0;
+pub const RADIUS_EARTH_EQUATOR_KM: Float = 6378.137;
+pub const RADIUS_EARTH_POLAR_KM: Float = 6356.752;
 pub const MASS_EARTH_KG: Float = 5.972168e24;
