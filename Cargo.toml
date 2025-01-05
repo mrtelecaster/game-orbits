@@ -6,9 +6,6 @@ edition = "2021"
 [dependencies]
 
 
-[[example]]
-name = "foo"
-
 [dev-dependencies]
 bevy = "0.15.0"
 approx = "*"

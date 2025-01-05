@@ -58,6 +58,10 @@ impl Body
     pub fn radius_equator_km(&self) -> Float {
         self.radius_equator_km
     }
+    /// Gets the polar radius of this body
+    pub fn radius_polar_km(&self) -> Float {
+        self.radius_polar_km
+    }
     /// Gets the radius of this body in meters, *m*
     pub fn radius_equator_m(&self) -> Float {
         self.radius_equator_km * constants::CONVERT_KM_TO_M
