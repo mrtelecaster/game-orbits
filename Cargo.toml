@@ -7,7 +7,7 @@ edition = "2021"
 
 
 [dev-dependencies]
-bevy = "0.15.0"
+bevy = {version="0.15.1", features=["jpeg"]}
 approx = "*"
 
 [profile.dev]
