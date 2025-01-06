@@ -1,6 +1,6 @@
 //! Constants used for math and unit conversion
 
-use std::f32::consts::{PI, TAU};
+use std::f32::consts::TAU;
 use crate::Float;
 
 

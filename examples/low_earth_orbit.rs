@@ -1,23 +1,61 @@
 //! Puts a camera in low earth orbit at about the same altitude as the
 //! international space station
 
-use bevy::prelude::*;
+use std::f32::consts::PI;
+
+use bevy::{prelude::*, pbr::wireframe::{Wireframe, WireframePlugin}};
 use game_orbits::{constants::*, Body};
 
 const SCALE: f32 = 1.0 / 1_000_000.0;
-const ALTITUDE_KM: f32 = 5000.0;
+const ALTITUDE_KM: f32 = 400.0;
 const PLANET_ROTATE_SPEED: f32 = 0.1;
 
 
 #[derive(Component)]
 struct Planet;
 
+#[derive(Component)]
+struct FramerateCounter {
+	pub frequency: f32,
+	time: f32,
+	measurements: Vec<f32>,
+}
+impl FramerateCounter {
+	fn new(freq: f32) -> Self {
+		Self{ frequency: freq, time: 0.0, measurements: Vec::new() }
+	}
+	/// Adds `delta` seconds to the counter's timer and returns the average framerate if enough
+	/// seconds have elapsed
+	fn add_time(&mut self, delta: f32) -> Option<f32> {
+		self.time += delta;
+		self.measurements.push(delta);
+		if self.time >= self.frequency {
+			let mut framerate_total = 0.0;
+			for measurement in &self.measurements {
+				let framerate = 1.0 / measurement;
+				framerate_total += framerate;
+			}
+			let framerate_average = framerate_total / (self.measurements.len() as f32);
+			self.time -= self.frequency;
+			self.measurements.clear();
+			return Some(framerate_average);
+		} else {
+			return None;
+		}
+	}
+}
+impl Default for FramerateCounter {
+	fn default() -> Self {
+		Self::new(0.3)
+	}
+}
+
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(Startup, (setup_earth, setup_camera, setup_sun))
-        .add_systems(Update, process_rotate_planet)
+        .add_plugins((DefaultPlugins, WireframePlugin))
+        .add_systems(Startup, (setup_earth, setup_camera, setup_sun, setup_ui))
+        .add_systems(Update, (process_rotate_planet, process_framerate_counter, render_gizmos))
         .run();
 }
 
@@ -28,18 +66,20 @@ fn setup_earth(
     let earth = Body::new_earth();
     let equatorial_radius_engine = earth.radius_equator_km() * CONVERT_KM_TO_M * SCALE;
     let polar_radius_engine = earth.radius_polar_km() * CONVERT_KM_TO_M * SCALE;
-    let mesh = meshes.add(Sphere::new(1.0).mesh().uv(64, 36));
-    let material = materials.add(StandardMaterial{
+    let mesh = Sphere::new(1.0).mesh().uv(100, 50);
+    let material = StandardMaterial{
         base_color_texture: Some(asset_server.load("earth_albedo.jpeg")),
         ..default()
-    });
+    };
     info!("Engine planet radius: equatorial {} polar {}", equatorial_radius_engine, polar_radius_engine);
     commands.spawn((
-        Mesh3d(mesh),
-        MeshMaterial3d(material),
+        Mesh3d(meshes.add(mesh)),
+        MeshMaterial3d(materials.add(material)),
         Transform::default()
-            .with_scale(Vec3::new(equatorial_radius_engine, polar_radius_engine, equatorial_radius_engine)),
+            .with_scale(Vec3::new(equatorial_radius_engine, polar_radius_engine, equatorial_radius_engine))
+            .with_rotation(Quat::from_axis_angle(Vec3::X, - PI / 2.0)),
         Planet,
+		Wireframe,
     ));
 }
 
@@ -63,6 +103,20 @@ fn setup_camera(mut commands: Commands) {
     ));
 }
 
+fn setup_ui(mut commands: Commands){
+	// framerate counter
+	commands.spawn((
+		Text::new("Framerate: 999.9 fr/s"),
+		Node{
+			position_type: PositionType::Absolute,
+			right: Val::ZERO,
+			top: Val::ZERO,
+			..default()
+		},
+		FramerateCounter::default(),
+	));
+}
+
 fn process_rotate_planet(
     input: Res<ButtonInput<KeyCode>>, time: Res<Time>,
     mut planets: Query<&mut Transform, With<Planet>>
@@ -77,4 +131,21 @@ fn process_rotate_planet(
     for mut transform in &mut planets {
         transform.rotate(Quat::from_axis_angle(Vec3::Y, rotation));
     }
+}
+
+fn process_framerate_counter(
+	mut text_nodes: Query<(&mut Text, &mut FramerateCounter), With<Node>>,
+	time: Res<Time>,
+){
+	let delta = time.delta_secs();
+	for (mut text, mut counter) in &mut text_nodes {
+		if let Some(framerate) = counter.add_time(delta) {
+			let message = format!("Framerate: {:.1} fr/s", framerate);
+			text.0 = message;
+		}
+	}
+}
+
+fn render_gizmos(mut gizmos: Gizmos) {
+	gizmos.axes(Transform::default(), 1.0);
 }
