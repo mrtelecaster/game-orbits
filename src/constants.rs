@@ -12,6 +12,7 @@ pub const G: Float = CONSTANT_OF_GRAVITATION;
 pub const CONVERT_DEG_TO_RAD: Float = TAU / 360.0;
 pub const CONVERT_RAD_TO_DEG: Float = 360.0 / TAU;
 pub const CONVERT_KM_TO_M: Float = 1000.0;
+pub const CONVERT_M_TO_KM: Float = 0.001;
 
 pub const RADIUS_EARTH_EQUATOR_KM: Float = 6378.137;
 pub const RADIUS_EARTH_POLAR_KM: Float = 6356.752;
