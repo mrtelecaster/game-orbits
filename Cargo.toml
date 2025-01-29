@@ -4,11 +4,16 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-
+bevy = {version="0.15.1", optional=true}
+gdext = {version="*", optional=true}
 
 [dev-dependencies]
 bevy = {version="0.15.1", features=["jpeg"]}
 approx = "*"
+
+[features]
+bevy = ["dep:bevy"]
+godot = ["dep:gdext"]
 
 [profile.dev]
 opt-level = 1
