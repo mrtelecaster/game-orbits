@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bevy = {version="0.15.1", optional=true}
 gdext = {version="*", optional=true}
+num-traits = "*"
 
 [dev-dependencies]
 bevy = {version="0.15.1", features=["jpeg"]}
