@@ -12,7 +12,7 @@
 //! a web article by Robert A. Braeunig
 
 
-pub mod constants; pub use constants::*;
+pub mod constants;
 mod structures; pub use structures::*;
 #[cfg(test)]
 mod problems;

@@ -73,7 +73,7 @@ impl<T> Body<T> where T: Copy
     }
     /// Calculates the body's *GM*, its mass times the Gravitational Constant *G*
     pub fn gm(&self) -> T where T: FromPrimitive + Mul<T, Output=T> {
-        self.mass_kg * T::from_f64(constants::G).unwrap()
+        self.mass_kg * T::from_f64(constants::CONST_G).unwrap()
     }
 }
 

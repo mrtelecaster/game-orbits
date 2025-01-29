@@ -1,28 +1,22 @@
 //! Implementations of [the practice math problems](http://www.braeunig.us/space/problem.htm#4.14)
 //! from [the *Orbital Mechanics* article](http://www.braeunig.us/space/orbmech.htm)
 //! that the math in this library is based on.
+//! 
+//! The implementations here compare the results to the solutions from the practice problems.
+//! However, the implementations use accurate values to real life while the solutions rely on
+//! simplified values, meaning that there can occasionally be a large difference in the value
+//! calculated by my implementation vs the solution to the problem from the website. If any of the
+//! `epsilon` values used for comparison seem a little larger than they should be, this is why. The
+//! calculations themselves aren't inaccurate, but they're calculated from different starting values
+//! than those used for the problem solutions.
+//! 
+//! These tests aren't here to ensure that my math gets the same results as the problem solutions,
+//! it's here just to verify that I've implemented the right function and haven't made any errors
+//! interpreting the math equations into code.
 
 use std::f32::consts::PI;
 use approx::assert_ulps_eq;
 use crate::{Body, constants::f32::*};
-
-/// Mass of the earth as defined in the practice problems
-///
-/// Some problems get a closer result to the listed solution in the problem when using these values,
-/// even if the solution and result are slightly inaccurate from realistic values.
-const EARTH_MASS_KG: f32 = 5.9737e24;
-
-/// Average radius of the earth, as defined in the practice problems
-/// 
-/// Some problems get a closer result to the listed solution in the problem when using these values,
-/// even if the solution and result are slightly inaccurate from realistic values.
-const EARTH_RADIUS_KM: f32 = 6_378.14;
-
-/// Gravitational constant *G*, as defined in the practice problems
-/// 
-/// Some problems get a closer result to the listed solution in the problem when using these values,
-/// even if the solution and result are slightly inaccurate from realistic values.
-const G: f32 = 6.67259e-11;
 
 
 /// Illustrates the difference in precision between the numbers used in
@@ -33,7 +27,7 @@ const G: f32 = 6.67259e-11;
 #[test]
 fn gm() {
     let problem_gm = 3.986005e14;
-    let earth: Body<f32> = Body::new(EARTH_MASS_KG, EARTH_RADIUS_KM, EARTH_RADIUS_KM);
+    let earth: Body<f32> = Body::new_earth();
     let gm: f32 = earth.mass_kg() * G;
     assert_ulps_eq!(problem_gm, gm, epsilon=0.001);
     let gm = earth.gm();
@@ -46,7 +40,7 @@ fn gm() {
 /// [Problem 4.1](http://www.braeunig.us/space/problem.htm#4.1)
 #[test]
 fn p_4_1() {
-    let earth: Body<f32> = Body::new(EARTH_MASS_KG, EARTH_RADIUS_KM, EARTH_RADIUS_KM);
+    let earth: Body<f32> = Body::new_earth();
     let gm: f32 = earth.gm();
     let altitude_m: f32 = 200_000.0;
     let r = earth.radius_equator_m() + altitude_m;
@@ -62,7 +56,7 @@ mod motions
     /// [Problem 4.2](http://www.braeunig.us/space/problem.htm#4.2)
     #[test]
     fn p_4_2() {
-        let earth: Body<f32> = Body::new(EARTH_MASS_KG, EARTH_RADIUS_KM, EARTH_RADIUS_KM);
+        let earth: Body<f32> = Body::new_earth();
         let gm: f32 = earth.gm();
         let altitude_m: f32 = 200_000.0;
         let r = earth.radius_equator_m() + altitude_m;
@@ -83,7 +77,7 @@ mod motions
     /// [Problem 4.4](http://www.braeunig.us/space/problem.htm#4.4)
     #[test]
     fn p_4_4() {
-        let earth: Body<f32> = Body::new(EARTH_MASS_KG, EARTH_RADIUS_KM, EARTH_RADIUS_KM);
+        let earth: Body<f32> = Body::new_earth();
         let r_p: f32 = earth.radius_equator_m() + 250_000.0;
         let r_a: f32 = earth.radius_equator_m() + 500_000.0;
         let gm: f32 = earth.gm();
@@ -101,7 +95,7 @@ mod motions
     /// [Problem 4.5](http://www.braeunig.us/space/problem.htm#4.5)
     #[test]
     fn p_4_5() {
-        let earth: Body<f32> = Body::new(EARTH_MASS_KG, EARTH_RADIUS_KM, EARTH_RADIUS_KM);
+        let earth: Body<f32> = Body::new_earth();
         let gm: f32 = earth.gm();
         let alt_p: f32 = 200_000.0; // Altitude at periapsis in meters
         let v_p: f32 = 7850.0; // Velocity at periapsis in meters per second
@@ -249,7 +243,7 @@ mod launch
     /// degrees past perigee.
     #[test]
     fn p_4_13() {
-        let earth: Body<f32> = Body::new(EARTH_MASS_KG, EARTH_RADIUS_KM, EARTH_RADIUS_KM);
+        let earth: Body<f32> = Body::new_earth();
         let a: f32 = 7_500_000.0;
         let e: f32 = 0.1;
         let t_0: f32 = 0.0;
