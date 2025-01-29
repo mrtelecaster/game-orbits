@@ -4,7 +4,7 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-
+num-traits = "*"
 
 [dev-dependencies]
 bevy = {version="0.15.1", features=["jpeg"]}

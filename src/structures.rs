@@ -1,27 +1,28 @@
 //! Data structures used by the library
-
-use crate::{Float, constants};
+use std::ops::Mul;
+use num_traits::FromPrimitive;
+use crate::{constants::f64 as constants};
 
 
 /// Keplerian elements that define an orbit
-pub struct OrbitalElements {
+pub struct OrbitalElements<T> {
     /// Semi-major axis, *a*
-    semimajor_axis: Float,
+    semimajor_axis: T,
     /// Eccentricity, *e*
-    eccentricity: Float,
+    eccentricity: T,
     /// Inclination, *i*
-    inclination: Float,
+    inclination: T,
     /// Argument of Periapsis, *ω*
-    arg_of_periapsis: Float,
+    arg_of_periapsis: T,
     /// Time of Periapsis Passage, *T*
-    time_of_periapsis_passage: Float,
+    time_of_periapsis_passage: T,
     /// Longitude of Ascending Node, *Ω*
-    long_of_ascending_node: Float,
+    long_of_ascending_node: T,
 }
-impl OrbitalElements {
+impl<T> OrbitalElements<T> {
     pub fn new(
-        semimajor_axis: Float, eccentricity: Float, inclination: Float, arg_of_periapsis: Float,
-        time_of_periapsis_passage: Float, long_of_ascending_node: Float,
+        semimajor_axis: T, eccentricity: T, inclination: T, arg_of_periapsis: T,
+        time_of_periapsis_passage: T, long_of_ascending_node: T,
     ) -> Self {
         Self{
             semimajor_axis, eccentricity, inclination, arg_of_periapsis,
@@ -32,43 +33,47 @@ impl OrbitalElements {
 
 
 /// A body in space represented as an idealized sphere
-pub struct Body {
+pub struct Body<T> {
     /// Mass of this body in kilograms (kg)
-    mass_kg: Float,
+    mass_kg: T,
     /// Equatorial radius of this body in kilometers (km)
-    radius_equator_km: Float,
+    radius_equator_km: T,
     /// Polar radius of this body in kilometers (km)
-    radius_polar_km: Float,
+    radius_polar_km: T,
 }
-impl Body
+impl<T> Body<T> where T: Copy
 {
     /// Create a new body with the given mass and radius properties
-    pub fn new(mass_kg: Float, radius_equator_km: Float, radius_polar_km: Float) -> Self {
-        Self{ mass_kg: mass_kg.into(), radius_equator_km, radius_polar_km }
+    pub fn new(mass_kg: T, radius_equator_km: T, radius_polar_km: T) -> Self {
+        Self{ mass_kg: mass_kg, radius_equator_km, radius_polar_km }
     }
     /// Create a new body with the properties of the planet [Earth](https://en.wikipedia.org/wiki/Earth)
-    pub fn new_earth() -> Self {
-        Self::new(constants::MASS_EARTH_KG, constants::RADIUS_EARTH_EQUATOR_KM, constants::RADIUS_EARTH_POLAR_KM)
+    pub fn new_earth() -> Self where T: FromPrimitive {
+        Self::new(
+			T::from_f64(constants::MASS_EARTH_KG).unwrap(),
+			T::from_f64(constants::RADIUS_EARTH_EQUATOR_KM).unwrap(),
+			T::from_f64(constants::RADIUS_EARTH_POLAR_KM).unwrap(),
+		)
     }
     /// Gets the mass of this body in kilograms, *kg*
-    pub fn mass_kg(&self) -> Float {
+    pub fn mass_kg(&self) -> T {
         self.mass_kg
     }
     /// Gets the radius of this body in kilometers, *km*
-    pub fn radius_equator_km(&self) -> Float {
+    pub fn radius_equator_km(&self) -> T {
         self.radius_equator_km
     }
     /// Gets the polar radius of this body
-    pub fn radius_polar_km(&self) -> Float {
+    pub fn radius_polar_km(&self) -> T {
         self.radius_polar_km
     }
     /// Gets the radius of this body in meters, *m*
-    pub fn radius_equator_m(&self) -> Float {
-        self.radius_equator_km * constants::CONVERT_KM_TO_M
+    pub fn radius_equator_m(&self) -> T where T: FromPrimitive + Mul<T, Output=T> {
+        self.radius_equator_km * T::from_f64(constants::CONVERT_KM_TO_M).unwrap()
     }
     /// Calculates the body's *GM*, its mass times the Gravitational Constant *G*
-    pub fn gm(&self) -> Float {
-        self.mass_kg * constants::G
+    pub fn gm(&self) -> T where T: FromPrimitive + Mul<T, Output=T> {
+        self.mass_kg * T::from_f64(constants::G).unwrap()
     }
 }
 

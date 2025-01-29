@@ -2048,6 +2048,7 @@ version = "0.0.0"
 dependencies = [
  "approx",
  "bevy",
+ "num-traits",
 ]
 
 [[package]]

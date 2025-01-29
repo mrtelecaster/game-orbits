@@ -16,7 +16,3 @@ pub mod constants; pub use constants::*;
 mod structures; pub use structures::*;
 #[cfg(test)]
 mod problems;
-
-
-/// Defining this so that I can swap `f32` with `f64` and back to compare
-pub type Float = f32;

@@ -3,12 +3,12 @@
 
 use std::f32::consts::PI;
 use bevy::{prelude::*, pbr::wireframe::{Wireframe, WireframePlugin}};
-use game_orbits::{constants::*, Body};
+use game_orbits::{constants::f32::*, Body};
 
 const SCALE: f32 = 1.0 / 3_000_000.0;
-const ALTITUDE_KM: f32 = 500.0;
+const ALTITUDE_KM: f32 = 400.0;
 const ECCENTRICITY: f32 = 0.01;
-const PLANET_ROTATE_SPEED: f32 = 0.1;
+const PLANET_START_ROTATION: f32 = -1.71;
 
 
 #[derive(Resource)]
@@ -39,13 +39,13 @@ impl Orbit {
 		self.eccentricity = eccentricity;
 		self
 	}
-	pub fn mean_motion(&self, body: &Body) -> f32 {
+	pub fn mean_motion(&self, body: &Body<f32>) -> f32 {
 		(body.gm() / self.semimajor_axis.powi(3)).sqrt()
 	}
-	pub fn mean_anomaly(&self, body: &Body) -> f32 {
+	pub fn mean_anomaly(&self, body: &Body<f32>) -> f32 {
 		self.time * self.mean_motion(body)
 	}
-	pub fn true_anomaly(&self, body: &Body) -> f32 {
+	pub fn true_anomaly(&self, body: &Body<f32>) -> f32 {
 		let mean_anomaly = self.mean_anomaly(body);
 		mean_anomaly + 2.0 * self.eccentricity * mean_anomaly.sin() + 1.25 * self.eccentricity.powi(2) * (2.0 * mean_anomaly).sin()
 	}
@@ -96,7 +96,7 @@ fn setup_earth(
     mut commands: Commands, asset_server: ResMut<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let earth = Body::new_earth();
+    let earth: Body<f32> = Body::new_earth();
     let equatorial_radius_engine = earth.radius_equator_km() * CONVERT_KM_TO_M * SCALE;
     let polar_radius_engine = earth.radius_polar_km() * CONVERT_KM_TO_M * SCALE;
     let mesh = Sphere::new(1.0).mesh().uv(200, 100);
@@ -110,7 +110,7 @@ fn setup_earth(
         MeshMaterial3d(materials.add(material)),
         Transform::default()
             .with_scale(Vec3::new(equatorial_radius_engine, polar_radius_engine, equatorial_radius_engine))
-            .with_rotation(Quat::from_axis_angle(Vec3::X, - PI / 2.0)),
+            .with_rotation(Quat::from_euler(EulerRot::XYZ, -PI / 2.0, 0.0, PLANET_START_ROTATION)),
         Planet,
 		Wireframe,
     ));
@@ -125,7 +125,7 @@ fn setup_sun(mut commands: Commands) {
 }
 
 fn setup_camera(mut commands: Commands) {
-    let earth = Body::new_earth();
+    let earth: Body<f32> = Body::new_earth();
     let planet_radius_km = earth.radius_equator_km();
     let orbit_radius_km = planet_radius_km + ALTITUDE_KM;
     let orbit_radius_engine = orbit_radius_km * CONVERT_KM_TO_M * SCALE;
@@ -193,22 +193,6 @@ fn process_orbit(
 	}
 }
 
-fn process_rotate_planet(
-    input: Res<ButtonInput<KeyCode>>, time: Res<Time>,
-    mut planets: Query<&mut Transform, With<Planet>>
-){
-    let mut rotation_input = 0.0;
-    if input.pressed(KeyCode::ArrowRight) {
-        rotation_input += 1.0;
-    } else if input.pressed(KeyCode::ArrowLeft) {
-        rotation_input -= 1.0;
-    }
-    let rotation = rotation_input * PLANET_ROTATE_SPEED * time.delta_secs();
-    for mut transform in &mut planets {
-        transform.rotate(Quat::from_axis_angle(Vec3::Y, rotation));
-    }
-}
-
 fn process_framerate_counter(
 	mut text_nodes: Query<(&mut Text, &mut FramerateCounter)>,
 	time: Res<Time>,
@@ -252,7 +236,7 @@ fn main() {
         .add_plugins((DefaultPlugins, WireframePlugin))
         .add_systems(Startup, (setup_earth, setup_camera, setup_sun, setup_ui))
         .add_systems(Update, (
-			process_orbit, process_rotate_planet, process_framerate_counter,
+			process_orbit, process_framerate_counter,
 			process_display_text.after(process_orbit),
 			render_gizmos,
 		))
