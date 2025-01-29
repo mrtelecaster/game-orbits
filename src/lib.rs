@@ -16,3 +16,6 @@ pub mod constants;
 mod structures; pub use structures::*;
 #[cfg(test)]
 mod problems;
+
+#[cfg(feature="godot")]
+pub mod feat_godot;
