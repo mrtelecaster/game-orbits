@@ -1,6 +1,9 @@
+use num_traits::{Float, FromPrimitive};
+use crate::constants::f64::*;
+
 /// Keplerian elements that define an orbit
 pub struct OrbitalElements<T> {
-    /// Semi-major axis, *a*
+    /// Semi-major axis, *a* in meters (m)
     pub semimajor_axis: T,
     /// Eccentricity, *e*
     pub eccentricity: T,
@@ -13,14 +16,43 @@ pub struct OrbitalElements<T> {
     /// Longitude of Ascending Node, *Ω*
     pub long_of_ascending_node: T,
 }
-impl<T> OrbitalElements<T> {
-    pub fn new(
-        semimajor_axis: T, eccentricity: T, inclination: T, arg_of_periapsis: T,
-        time_of_periapsis_passage: T, long_of_ascending_node: T,
-    ) -> Self {
-        Self{
-            semimajor_axis, eccentricity, inclination, arg_of_periapsis,
-            time_of_periapsis_passage, long_of_ascending_node,
-        }
-    }
+impl<T> OrbitalElements<T> where T: Float + FromPrimitive {
+	/// Sets the orbit's semimajor axis *a* in kilometers (km)
+	pub fn with_semimajor_axis_km(mut self, a: T) -> Self {
+		self.semimajor_axis = a * T::from_f64(CONVERT_KM_TO_M).unwrap();
+		self
+	}
+	/// Sets the orbit's eccentricity
+	pub fn with_eccentricity(mut self, e: T) -> Self {
+		self.eccentricity = e;
+		self
+	}
+	/// Sets the orbit's inclination *i* in degrees
+	pub fn with_inclination_deg(mut self, deg: T) -> Self {
+		self.inclination = deg * T::from_f64(CONVERT_DEG_TO_RAD).unwrap();
+		self
+	}
+	/// Sets the orbit's argument of periapsis *ω* in degrees
+	pub fn with_arg_of_periapsis_deg(mut self, deg: T) -> Self {
+		self.arg_of_periapsis = deg * T::from_f64(CONVERT_DEG_TO_RAD).unwrap();
+		self
+	}
+	/// Sets the orbit's longitude of ascending node *Ω* in degrees
+	pub fn with_long_of_ascending_node_deg(mut self, deg: T) -> Self {
+		self.long_of_ascending_node = deg * T::from_f64(CONVERT_DEG_TO_RAD).unwrap();
+		self
+	}
+}
+impl<T> Default for OrbitalElements<T> where T: Copy + FromPrimitive {
+	fn default() -> Self {
+		let zero = T::from_f32(0.0).unwrap();
+		Self {
+			semimajor_axis: zero,
+			eccentricity: zero,
+			inclination: zero,
+			arg_of_periapsis: zero,
+			time_of_periapsis_passage: zero,
+			long_of_ascending_node: zero,
+		}
+	}
 }
