@@ -1,4 +1,4 @@
-//! Orbital mechanics library for games
+//! Simplified orbital mechanics library for games
 //! 
 //! Used for simulating celestial bodies' orbits using basic Keplerian mechanics
 //! and return information on the relative positions and directions between
@@ -13,7 +13,8 @@
 
 
 pub mod constants;
-mod structures; pub use structures::*;
+mod body; pub use body::*;
+mod elements; pub use elements::*;
 #[cfg(test)]
 mod problems;
 

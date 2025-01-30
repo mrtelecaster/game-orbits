@@ -3,34 +3,6 @@ use num_traits::{Float, FromPrimitive};
 use crate::{constants::f64 as constants};
 
 
-/// Keplerian elements that define an orbit
-pub struct OrbitalElements<T> {
-    /// Semi-major axis, *a*
-    pub semimajor_axis: T,
-    /// Eccentricity, *e*
-    pub eccentricity: T,
-    /// Inclination, *i*
-    pub inclination: T,
-    /// Argument of Periapsis, *ω*
-    pub arg_of_periapsis: T,
-    /// Time of Periapsis Passage, *T*
-    pub time_of_periapsis_passage: T,
-    /// Longitude of Ascending Node, *Ω*
-    pub long_of_ascending_node: T,
-}
-impl<T> OrbitalElements<T> {
-    pub fn new(
-        semimajor_axis: T, eccentricity: T, inclination: T, arg_of_periapsis: T,
-        time_of_periapsis_passage: T, long_of_ascending_node: T,
-    ) -> Self {
-        Self{
-            semimajor_axis, eccentricity, inclination, arg_of_periapsis,
-            time_of_periapsis_passage, long_of_ascending_node,
-        }
-    }
-}
-
-
 /// A body in space represented as an idealized sphere
 pub struct Body<T> {
     /// Mass of this body in kilograms (kg)
@@ -104,30 +76,26 @@ mod tests {
     use super::*;
     use approx::assert_ulps_eq;
 
-    mod body {
-        use super::*;
+	#[test]
+	fn gm() {
+		assert_ulps_eq!(3.986005e14, Body::new_earth().gm(), epsilon = 2000000.0);
+	}
 
-        #[test]
-        fn gm() {
-            assert_ulps_eq!(3.986005e14, Body::new_earth().gm(), epsilon = 2000000.0);
-        }
+	#[test]
+	fn gravity() {
+		let earth: Body<f32> = Body::new_earth();
+		let surface_altitude = constants::RADIUS_EARTH_MEAN_KM * constants::CONVERT_KM_TO_M;
+		assert_ulps_eq!(9.81, earth.gravity_at_distance(surface_altitude as f32), epsilon=0.05);
+		assert_ulps_eq!(surface_altitude as f32, earth.distance_of_gravity(9.81), epsilon=5000.0);
+	}
 
-		#[test]
-		fn gravity() {
-			let earth: Body<f32> = Body::new_earth();
-			let surface_altitude = constants::RADIUS_EARTH_MEAN_KM * constants::CONVERT_KM_TO_M;
-			assert_ulps_eq!(9.81, earth.gravity_at_distance(surface_altitude as f32), epsilon=0.05);
-			assert_ulps_eq!(surface_altitude as f32, earth.distance_of_gravity(9.81), epsilon=5000.0);
-		}
-
-		#[test]
-		fn sun_sphere_of_influence() {
-			let sun: Body<f32> = Body::new_sol();
-			let gravity = 0.0000005; // force of gravity that results in a SOI distance larger than the heliopause
-			let distance_m = sun.distance_of_gravity(gravity);
-			let distance_au = distance_m * constants::CONVERT_M_TO_AU as f32;
-			let minimum_au = 100.0; // distance of heliopause
-			assert!(minimum_au < distance_au, "Expected distance of gravity to be greater than {:.2} AU, but {:.2} AU was returned", minimum_au, distance_au);
-		}
-    }
+	#[test]
+	fn sun_sphere_of_influence() {
+		let sun: Body<f32> = Body::new_sol();
+		let gravity = 0.0000005; // force of gravity that results in a SOI distance larger than the heliopause
+		let distance_m = sun.distance_of_gravity(gravity);
+		let distance_au = distance_m * constants::CONVERT_M_TO_AU as f32;
+		let minimum_au = 100.0; // distance of heliopause
+		assert!(minimum_au < distance_au, "Expected distance of gravity to be greater than {:.2} AU, but {:.2} AU was returned", minimum_au, distance_au);
+	}
 }
