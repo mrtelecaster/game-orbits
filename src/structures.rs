@@ -119,5 +119,15 @@ mod tests {
 			assert_ulps_eq!(9.81, earth.gravity_at_distance(surface_altitude as f32), epsilon=0.05);
 			assert_ulps_eq!(surface_altitude as f32, earth.distance_of_gravity(9.81), epsilon=5000.0);
 		}
+
+		#[test]
+		fn sun_sphere_of_influence() {
+			let sun: Body<f32> = Body::new_sol();
+			let gravity = 0.0000005; // force of gravity that results in a SOI distance larger than the heliopause
+			let distance_m = sun.distance_of_gravity(gravity);
+			let distance_au = distance_m * constants::CONVERT_M_TO_AU as f32;
+			let minimum_au = 100.0; // distance of heliopause
+			assert!(minimum_au < distance_au, "Expected distance of gravity to be greater than {:.2} AU, but {:.2} AU was returned", minimum_au, distance_au);
+		}
     }
 }
