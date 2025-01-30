@@ -36,6 +36,8 @@ pub mod f64 {
 	/// Gravitational Constant *G* (N * m ^ 2 / kg ^ 2)
 	pub const CONST_G: f64 = CONST_GRAVITATION;
 
+	pub const CONVERT_AU_TO_KM: f64 = 149597870.7;
+	pub const CONVERT_KM_TO_AU: f64 = 1.0 / CONVERT_AU_TO_KM;
 	pub const CONVERT_DEG_TO_RAD: f64 = TAU / 360.0;
 	pub const CONVERT_RAD_TO_DEG: f64 = 360.0 / TAU;
 	pub const CONVERT_KM_TO_M: f64 = 1000.0;
@@ -43,7 +45,10 @@ pub mod f64 {
 
 	pub const RADIUS_EARTH_EQUATOR_KM: f64 = 6378.137;
 	pub const RADIUS_EARTH_POLAR_KM: f64 = 6356.752;
+	pub const RADIUS_EARTH_MEAN_KM: f64 = 6371.0;
+	pub const RADIUS_SUN_KM: f64 = 6.957e8;
 	pub const MASS_EARTH_KG: f64 = 5.972168e24;
+	pub const MASS_SUN_KG: f64 = 1.9885e30;
 }
 
 pub mod f32 {

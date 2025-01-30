@@ -1,4 +1,4 @@
-//! Implementations of [the practice math problems](http://www.braeunig.us/space/problem.htm#4.14)
+//! Implementations of [the practice math problems](http://www.braeunig.us/space/problem.htm)
 //! from [the *Orbital Mechanics* article](http://www.braeunig.us/space/orbmech.htm)
 //! that the math in this library is based on.
 //! 

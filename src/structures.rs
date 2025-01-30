@@ -1,23 +1,22 @@
 //! Data structures used by the library
-use std::ops::Mul;
-use num_traits::FromPrimitive;
+use num_traits::{Float, FromPrimitive};
 use crate::{constants::f64 as constants};
 
 
 /// Keplerian elements that define an orbit
 pub struct OrbitalElements<T> {
     /// Semi-major axis, *a*
-    semimajor_axis: T,
+    pub semimajor_axis: T,
     /// Eccentricity, *e*
-    eccentricity: T,
+    pub eccentricity: T,
     /// Inclination, *i*
-    inclination: T,
+    pub inclination: T,
     /// Argument of Periapsis, *ω*
-    arg_of_periapsis: T,
+    pub arg_of_periapsis: T,
     /// Time of Periapsis Passage, *T*
-    time_of_periapsis_passage: T,
+    pub time_of_periapsis_passage: T,
     /// Longitude of Ascending Node, *Ω*
-    long_of_ascending_node: T,
+    pub long_of_ascending_node: T,
 }
 impl<T> OrbitalElements<T> {
     pub fn new(
@@ -41,13 +40,13 @@ pub struct Body<T> {
     /// Polar radius of this body in kilometers (km)
     radius_polar_km: T,
 }
-impl<T> Body<T> where T: Copy
+impl<T> Body<T> where T: Float + FromPrimitive
 {
     /// Create a new body with the given mass and radius properties
     pub fn new(mass_kg: T, radius_equator_km: T, radius_polar_km: T) -> Self {
         Self{ mass_kg: mass_kg, radius_equator_km, radius_polar_km }
     }
-    /// Create a new body with the properties of the planet [Earth](https://en.wikipedia.org/wiki/Earth)
+    /// Create a new body with the properties of [the planet Earth](https://en.wikipedia.org/wiki/Earth)
     pub fn new_earth() -> Self where T: FromPrimitive {
         Self::new(
 			T::from_f64(constants::MASS_EARTH_KG).unwrap(),
@@ -55,6 +54,14 @@ impl<T> Body<T> where T: Copy
 			T::from_f64(constants::RADIUS_EARTH_POLAR_KM).unwrap(),
 		)
     }
+	/// Create a new body with the properties of [our sun]()
+	pub fn new_sol() -> Self where T: FromPrimitive {
+		Self::new(
+			T::from_f64(constants::MASS_SUN_KG).unwrap(),
+			T::from_f64(constants::RADIUS_SUN_KM).unwrap(),
+			T::from_f64(constants::RADIUS_SUN_KM).unwrap(),
+		)
+	}
     /// Gets the mass of this body in kilograms, *kg*
     pub fn mass_kg(&self) -> T {
         self.mass_kg
@@ -68,13 +75,27 @@ impl<T> Body<T> where T: Copy
         self.radius_polar_km
     }
     /// Gets the radius of this body in meters, *m*
-    pub fn radius_equator_m(&self) -> T where T: FromPrimitive + Mul<T, Output=T> {
+    pub fn radius_equator_m(&self) -> T {
         self.radius_equator_km * T::from_f64(constants::CONVERT_KM_TO_M).unwrap()
     }
     /// Calculates the body's *GM*, its mass times the Gravitational Constant *G*
-    pub fn gm(&self) -> T where T: FromPrimitive + Mul<T, Output=T> {
+    pub fn gm(&self) -> T {
         self.mass_kg * T::from_f64(constants::CONST_G).unwrap()
     }
+	/// Returns the distance at which the force of gravity equals the given value
+	/// 
+	/// d = sqrt(GM/F)
+	pub fn distance_of_gravity(&self, gravity: T) -> T {
+		let g = T::from_f64(constants::CONST_G).unwrap();
+		((g * self.mass_kg) / gravity).sqrt()
+	}
+	/// Calculate the force of gravity towards this body at the given distance
+	/// 
+	/// F = GM/d^2
+	pub fn gravity_at_distance(&self, distance: T) -> T {
+		let g = T::from_f64(constants::CONST_G).unwrap();
+		(g * self.mass_kg) / distance.powi(2)
+	}
 }
 
 
@@ -90,5 +111,13 @@ mod tests {
         fn gm() {
             assert_ulps_eq!(3.986005e14, Body::new_earth().gm(), epsilon = 2000000.0);
         }
+
+		#[test]
+		fn gravity() {
+			let earth: Body<f32> = Body::new_earth();
+			let surface_altitude = constants::RADIUS_EARTH_MEAN_KM * constants::CONVERT_KM_TO_M;
+			assert_ulps_eq!(9.81, earth.gravity_at_distance(surface_altitude as f32), epsilon=0.05);
+			assert_ulps_eq!(surface_altitude as f32, earth.distance_of_gravity(9.81), epsilon=5000.0);
+		}
     }
 }
