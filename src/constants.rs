@@ -1,7 +1,7 @@
 //! Constants used for math and unit conversion
 //! 
-//! Constants are defined as [f64](crate::constants::f64) for maximum precision, then cast to lower
-//! precision for constants in other modules.
+//! Constants are defined as [mod@f64] for maximum precision, then cast to lower precision for constants
+//! in other modules.
 //! 
 //! ### Nomenclature
 //! 
