@@ -2,6 +2,7 @@ use num_traits::{Float, FromPrimitive};
 use crate::constants::f64::*;
 
 /// Keplerian elements that define an orbit
+#[derive(Clone)]
 pub struct OrbitalElements<T> {
     /// Semi-major axis, *a* in meters (m)
     pub semimajor_axis: T,
