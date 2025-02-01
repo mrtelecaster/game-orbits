@@ -25,7 +25,7 @@ fn draw_orbits(mut gizmos: Gizmos, db: Res<Database<usize, f32>>) {
 			let t_1 = step * (i + 1) as f32;
 			let (r_0, n_0) = db.position_at_mean_anomaly(*handle, t_0);
 			let (r_1, n_1) = db.position_at_mean_anomaly(*handle, t_1);
-			info!("r_0: {} \tn_0: {} \tr_1: {} \tn_1: {}", r_0, n_0, r_1, n_1);
+			// info!("r_0: {} \tn_0: {} \tr_1: {} \tn_1: {}", r_0, n_0, r_1, n_1);
 			let rot_0 = Quat::from_axis_angle(Vec3::Y, n_0);
 			let rot_1 = Quat::from_axis_angle(Vec3::Y, n_1);
 			let dir_0 = rot_0 * Vec3::X;
