@@ -1,16 +1,19 @@
-use std::f32::consts::TAU;
+use std::f32::consts::{PI, TAU};
 use bevy::prelude::*;
 use game_orbits::Database;
 
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
+const PERIAPSIS_COLOR: Color = Color::srgb(1.0, 0.5, 0.0);
+const APOAPSIS_COLOR: Color = Color::srgb(0.0, 0.5, 1.0);
+const APSIS_SIZE: f32 = 1.0;
 
 
 fn setup_camera(mut commands: Commands) {
 	commands.spawn((
 		Camera3d::default(),
-		Transform::from_xyz(1.0, 100.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
+		Transform::from_xyz(0.0, 1.0, -100.0).looking_at(Vec3::ZERO, Vec3::Y),
 	));
 }
 
@@ -21,20 +24,23 @@ fn draw_orbits(mut gizmos: Gizmos, db: Res<Database<usize, f32>>) {
 			continue;
 		}
 		let orbit = entry.orbit.clone().unwrap();
+		// draw orbit path
 		for i in 0..ORBIT_SEGMENTS-1 {
 			let t_0 = step * i as f32;
 			let t_1 = step * (i + 1) as f32;
-			let (r_0, n_0) = db.position_at_mean_anomaly(*handle, t_0);
-			let (r_1, n_1) = db.position_at_mean_anomaly(*handle, t_1);
-			// info!("r_0: {} \tn_0: {} \tr_1: {} \tn_1: {}", r_0, n_0, r_1, n_1);
-			let rot_0 = Quat::from_axis_angle(Vec3::Y, n_0 + orbit.long_of_ascending_node + orbit.arg_of_periapsis);
-			let rot_1 = Quat::from_axis_angle(Vec3::Y, n_1 + orbit.long_of_ascending_node + orbit.arg_of_periapsis);
-			let dir_0 = rot_0 * Vec3::X;
-			let dir_1 = rot_1 * Vec3::X;
-			let pos_0 = dir_0 * r_0;
-			let pos_1 = dir_1 * r_1;
-			gizmos.line(pos_0, pos_1, ORBIT_COLOR);
+			let pos_0_nalgebra = db.position_at_mean_anomaly(*handle, t_0);
+			let pos_1_nalgebra = db.position_at_mean_anomaly(*handle, t_1);
+			let pos_0_bevy = Vec3::new(pos_0_nalgebra.x, pos_0_nalgebra.y, pos_0_nalgebra.z);
+			let pos_1_bevy = Vec3::new(pos_1_nalgebra.x, pos_1_nalgebra.y, pos_1_nalgebra.z);
+			gizmos.line(pos_0_bevy, pos_1_bevy, ORBIT_COLOR);
 		}
+		// draw apoapsis/periapsis
+		let periapsis_nalgebra = db.position_at_mean_anomaly(*handle, 0.0);
+		let apoapsis_nalgebra = db.position_at_mean_anomaly(*handle, PI);
+		let periapsis_bevy = Vec3::new(periapsis_nalgebra.x, periapsis_nalgebra.y, periapsis_nalgebra.z);
+		let apoapsis_bevy = Vec3::new(apoapsis_nalgebra.x, apoapsis_nalgebra.y, apoapsis_nalgebra.z);
+		gizmos.sphere(periapsis_bevy, APSIS_SIZE, PERIAPSIS_COLOR);
+		gizmos.sphere(apoapsis_bevy, APSIS_SIZE, APOAPSIS_COLOR);
 	}
 }
 

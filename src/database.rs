@@ -1,4 +1,5 @@
 use std::{collections::{hash_map::Iter, HashMap}, hash::Hash};
+use nalgebra::{RealField, Rotation3, SimdRealField, SimdValue, Vector3};
 use num_traits::{Float, FromPrimitive};
 use crate::{Body, OrbitalElements};
 
@@ -59,17 +60,25 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		self.bodies.insert(handle, entry);
 	}
 	/// Gets the position of the given body at the given mean anomaly value
-	pub fn position_at_mean_anomaly(&self, handle: H, mean_anomaly: T) -> (T, T) {
+	pub fn position_at_mean_anomaly(&self, handle: H, mean_anomaly: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
+		let zero = T::from_f64(0.0).unwrap();
 		let one = T::from_f64(1.0).unwrap();
 		let two = T::from_f64(2.0).unwrap();
 		let orbiting_body = self.bodies.get(&handle).unwrap();
 		let parent_body = self.bodies.get(&orbiting_body.parent.clone().unwrap()).unwrap();
 		let orbit = &orbiting_body.orbit.clone().unwrap();
-		let true_anomaly = mean_anomaly + two * orbit.eccentricity * mean_anomaly.sin() + T::from_f64(1.25).unwrap() * orbit.eccentricity.powi(2) * (two * mean_anomaly).sin();
+		let true_anomaly = mean_anomaly + two * orbit.eccentricity * Float::sin(mean_anomaly) + T::from_f64(1.25).unwrap() * Float::powi(orbit.eccentricity, 2) * Float::sin(two * mean_anomaly);
 		let radius = orbit.semimajor_axis * (one - Float::powi(orbit.eccentricity, 2)) / (one + orbit.eccentricity * Float::cos(true_anomaly));
 		let scale = parent_body.scale;
 		let game_radius = radius * scale;
-		return (game_radius, true_anomaly);
+		let rot_true_anomaly = Rotation3::new(Vector3::new(zero, one, zero) * true_anomaly);
+		let rot_long_of_ascending_node = Rotation3::new(Vector3::new(zero, one, zero) * orbit.long_of_ascending_node);
+		let dir_ascending_node = rot_long_of_ascending_node * Vector3::new(one, zero, zero);
+		let dir_normal = Vector3::new(one, zero, zero).cross(&dir_ascending_node);
+		let rot_inclination = Rotation3::new(dir_ascending_node * orbit.inclination);
+		let rot_arg_of_periapsis = Rotation3::new(dir_normal * orbit.arg_of_periapsis);
+		let direction = rot_inclination * rot_arg_of_periapsis * rot_true_anomaly * Vector3::new(one, zero, zero);
+		return direction * game_radius;
 	}
 	pub fn iter(&self) -> Iter<'_, H, DatabaseEntry<H, T>> {
 		self.bodies.iter()
