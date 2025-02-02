@@ -44,6 +44,8 @@ pub mod f64 {
 	pub const CONVERT_KM_TO_M: f64 = 1000.0;
 	pub const CONVERT_M_TO_AU: f64 = 1.0 / CONVERT_AU_TO_M;
 	pub const CONVERT_M_TO_KM: f64 = 0.001;
+	pub const CONVERT_EARTH_MASS_TO_KG: f64 = 5.972168e24;
+	pub const CONVERT_SUN_MASS_TO_KG: f64 = 1.9885e30;
 
 	pub const RADIUS_EARTH_EQUATOR_KM: f64 = 6378.137;
 	pub const RADIUS_EARTH_POLAR_KM: f64 = 6356.752;

@@ -34,6 +34,20 @@ impl<T> Body<T> where T: Float + FromPrimitive
 			T::from_f64(constants::RADIUS_SUN_KM).unwrap(),
 		)
 	}
+	pub fn with_mass_kg(mut self, mass: T) -> Self {
+		self.mass_kg = mass;
+		self
+	}
+	pub fn with_mass_earths(mut self, mass: T) -> Self {
+		self.mass_kg = mass * T::from_f64(constants::CONVERT_EARTH_MASS_TO_KG).unwrap();
+		self
+	}
+	/// Sets both the polar and equatorial radius to the given value
+	pub fn with_radius_km(mut self, radius: T) -> Self {
+		self.radius_polar_km = radius;
+		self.radius_equator_km = radius;
+		self
+	}
     /// Gets the mass of this body in kilograms, *kg*
     pub fn mass_kg(&self) -> T {
         self.mass_kg
@@ -67,6 +81,12 @@ impl<T> Body<T> where T: Float + FromPrimitive
 	pub fn gravity_at_distance(&self, distance: T) -> T {
 		let g = T::from_f64(constants::CONST_G).unwrap();
 		(g * self.mass_kg) / distance.powi(2)
+	}
+}
+impl<T> Default for Body<T> where T: Float + FromPrimitive {
+	fn default() -> Self {
+		let zero = T::from_f64(0.0).unwrap();
+		Self::new(zero, zero, zero)
 	}
 }
 

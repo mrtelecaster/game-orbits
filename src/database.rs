@@ -29,7 +29,9 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		db.add_entry(sun_handle.clone(), sun_entry);
 		// mercury
 		let mercury_handle = H::from_u16(1).unwrap();
-		let mercury_info: Body<T> = Body::new_earth();
+		let mercury_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(3.3011e23).unwrap())
+			.with_radius_km(T::from_f64(2439.7).unwrap());
 		let mercury_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(5.791e7).unwrap())
 			.with_eccentricity(T::from_f64(0.205630).unwrap())
