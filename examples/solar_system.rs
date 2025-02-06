@@ -17,11 +17,18 @@ const APSIS_SIZE: f32 = 0.2;
 
 #[derive(Component)]
 struct CameraParent {
+	pub centered_body: usize,
 	pub rotation: f32,
+}
+impl CameraParent {
+	pub fn centered_on(mut self, handle: usize) -> Self {
+		self.centered_body = handle;
+		self
+	}
 }
 impl Default for CameraParent {
 	fn default() -> Self {
-		Self{ rotation: 0.0 }
+		Self{ rotation: 0.0, centered_body: 0 }
 	}
 }
 
@@ -30,12 +37,12 @@ fn setup_camera(mut commands: Commands) {
 	// camera
 	let camera = commands.spawn((
 		Camera3d::default(),
-		Transform::from_xyz(50.0, 35.0, -100.0).looking_at(Vec3::ZERO, Vec3::Y),
+		Transform::from_xyz(0.0, 35.0, -100.0).looking_at(Vec3::ZERO, Vec3::Y),
 	)).id();
 	// camera parent
 	commands.spawn((
 		Transform::default(),
-		CameraParent::default(),
+		CameraParent::default().centered_on(3),
 	)).add_child(camera);
 }
 
@@ -56,9 +63,15 @@ fn process_input(
 fn update_camera_position(
 	mut camera_parents: Query<(&mut Transform, &CameraParent), Without<Camera3d>>,
 	mut cameras: Query<&mut Transform, (With<Camera3d>, Without<CameraParent>)>,
+	database: Res<Database<usize, f32>>,
 ){
 	let (mut camera_parent_transform, camera_parent) = camera_parents.single_mut();
 	let mut _camera = cameras.single_mut();
+	let centered_on_entry = database.get_entry(camera_parent.centered_body);
+	let nalgebra_position = database.position_at_mean_anomaly(camera_parent.centered_body, centered_on_entry.mean_anomaly_at_epoch);
+	let center_position = Vec3::new(nalgebra_position.x, nalgebra_position.y, nalgebra_position.z);
+	// info!("Setting camera center position to {:?}", center_position);
+	camera_parent_transform.translation = center_position;
 	camera_parent_transform.rotation = Quat::from_axis_angle(Vec3::Y, camera_parent.rotation);
 }
 
@@ -107,7 +120,7 @@ fn draw_axis(mut gizmos: Gizmos) {
 fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
-		.insert_resource(Database::<usize, f32>::solar_system())
+		.insert_resource(Database::<usize, f32>::default().with_solar_system())
 		.add_systems(Startup, setup_camera)
 		.add_systems(Update, (
 			draw_orbits, draw_planets, draw_axis,

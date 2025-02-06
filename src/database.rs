@@ -6,6 +6,9 @@ use crate::{constants::f64::CONVERT_DEG_TO_RAD, Body, OrbitalElements};
 #[cfg(feature="bevy")]
 use bevy::prelude::*;
 
+pub const HANDLE_SOL: u16 = 0;
+pub const HANDLE_MERCURY: u16 = 1;
+
 /// Holds the data for all the bodies being simulated
 /// 
 /// This is the main source of information for game engine implementations. The game engine should
@@ -20,16 +23,25 @@ pub struct Database<H, T> {
 	bodies: HashMap<H, DatabaseEntry<H, T>>,
 }
 impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone + Float + FromPrimitive {
-	/// Creates a new database pre-populated with celestial bodies from our solar system
-	pub fn solar_system() -> Self {
-		let mut db = Self::default();
-		// sol/sun
-		let sun_handle = H::from_u16(0).unwrap();
+	/// populates the database with celestial bodies from our solar system
+	pub fn with_solar_system(self) -> Self {
+		self.with_sol()
+			.with_mercury()
+			.with_venus()
+			.with_earth()
+	}
+	/// Adds our sun to the database
+	pub fn with_sol(mut self) -> Self {
+		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
 		let sun_info: Body<T> = Body::new_sol();
 		let sun_entry = DatabaseEntry::new(sun_info).with_scale(T::from_f64(1.0 / 5_000_000_000.0).unwrap());
-		db.add_entry(sun_handle.clone(), sun_entry);
-		// mercury
-		let mercury_handle = H::from_u16(1).unwrap();
+		self.add_entry(sun_handle.clone(), sun_entry);
+		self
+	}
+	/// Adds the planet mercury to the database
+	pub fn with_mercury(mut self) -> Self {
+		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
+		let mercury_handle = H::from_u16(HANDLE_MERCURY).unwrap();
 		let mercury_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(3.3011e23).unwrap())
 			.with_radius_km(T::from_f64(2439.7).unwrap());
@@ -42,8 +54,12 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let mercury_entry = DatabaseEntry::new(mercury_info)
 			.with_parent(sun_handle.clone(), mercury_orbit)
 			.with_mean_anomaly_deg(T::from_f64(174.796).unwrap());
-		db.add_entry(mercury_handle, mercury_entry);
-		// venus
+		self.add_entry(mercury_handle, mercury_entry);
+		self
+	}
+	/// Adds the planet venus to the database
+	pub fn with_venus(mut self) -> Self {
+		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
 		let venus_handle = H::from_u16(2).unwrap();
 		let venus_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(4.8675e24).unwrap())
@@ -57,8 +73,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let venus_entry = DatabaseEntry::new(venus_info)
 			.with_parent(sun_handle.clone(), venus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(	50.115).unwrap());
-		db.add_entry(venus_handle, venus_entry);
-		// earth
+		self.add_entry(venus_handle, venus_entry);
+		self
+	}
+	pub fn with_earth(mut self) -> Self {
+		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
 		let earth_handle = H::from_u16(3).unwrap();
 		let earth_info: Body<T> = Body::new_earth();
 		let earth_orbit: OrbitalElements<T> = OrbitalElements::default()
@@ -70,9 +89,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let earth_entry = DatabaseEntry::new(earth_info)
 			.with_parent(sun_handle.clone(), earth_orbit)
 			.with_mean_anomaly_deg(T::from_f64(358.617).unwrap());
-		db.add_entry(earth_handle, earth_entry);
-		// return database
-		db
+		self.add_entry(earth_handle, earth_entry);
+		self
 	}
 	/// Adds a new entry to the database
 	pub fn add_entry(&mut self, handle: H, entry: DatabaseEntry<H, T>) {
@@ -84,12 +102,14 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	}
 	/// Gets the position of the given body at the given mean anomaly value
 	pub fn position_at_mean_anomaly(&self, handle: H, mean_anomaly: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
-		let zero = T::from_f64(0.0).unwrap();
-		let one = T::from_f64(1.0).unwrap();
-		let two = T::from_f64(2.0).unwrap();
+		let zero = T::from_f32(0.0).unwrap();
+		let one = T::from_f32(1.0).unwrap();
+		let two = T::from_f32(2.0).unwrap();
 		let orbiting_body = self.bodies.get(&handle).unwrap();
 		if let Some(orbit) = &orbiting_body.orbit {
-			let parent_body = self.bodies.get(&orbiting_body.parent.clone().unwrap()).unwrap();
+			let parent_handle = orbiting_body.parent.clone().unwrap();
+			let parent_body = self.bodies.get(&parent_handle).unwrap();
+			let parent_position = self.position_at_mean_anomaly(parent_handle, mean_anomaly);
 			let true_anomaly = mean_anomaly + two * orbit.eccentricity * Float::sin(mean_anomaly) + T::from_f64(1.25).unwrap() * Float::powi(orbit.eccentricity, 2) * Float::sin(two * mean_anomaly);
 			let radius = orbit.semimajor_axis * (one - Float::powi(orbit.eccentricity, 2)) / (one + orbit.eccentricity * Float::cos(true_anomaly));
 			let scale = parent_body.scale;
@@ -101,7 +121,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			let rot_inclination = Rotation3::new(dir_ascending_node * orbit.inclination);
 			let rot_arg_of_periapsis = Rotation3::new(dir_normal * orbit.arg_of_periapsis);
 			let direction = rot_inclination * rot_arg_of_periapsis * rot_true_anomaly * Vector3::new(one, zero, zero);
-			return direction * game_radius;
+			return direction * game_radius + parent_position;
 		} else {
 			return Vector3::new(zero, zero, zero);
 		}
