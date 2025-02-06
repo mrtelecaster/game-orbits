@@ -1,6 +1,6 @@
 //! Data structures used by the library
 use num_traits::{Float, FromPrimitive};
-use crate::{constants::f64 as constants};
+use crate::constants::f64 as constants;
 
 
 /// A body in space represented as an idealized sphere
