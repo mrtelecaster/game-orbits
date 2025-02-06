@@ -1,4 +1,4 @@
-use std::{collections::{hash_map::Iter, HashMap}, fmt::Display, hash::Hash, ops::Mul};
+use std::{collections::{hash_map::Iter, HashMap}, hash::Hash, ops::Mul};
 use nalgebra::{RealField, Rotation3, SimdRealField, SimdValue, Vector3};
 use num_traits::{Float, FromPrimitive};
 use crate::{constants::f64::CONVERT_DEG_TO_RAD, Body, OrbitalElements};
@@ -114,11 +114,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		self.bodies.insert(handle, entry);
 	}
 	/// Gets the entry from the database with the given handle
-	pub fn get_entry(&self, handle: H) -> &DatabaseEntry<H, T> {
-		self.bodies.get(&handle).unwrap()
+	pub fn get_entry(&self, handle: &H) -> &DatabaseEntry<H, T> {
+		self.bodies.get(handle).unwrap()
 	}
 	/// Gets the position of the given body at the given mean anomaly value
-	pub fn position_at_mean_anomaly(&self, handle: H, mean_anomaly: T) -> Vector3<T> where H: Display, T: RealField + SimdValue + SimdRealField + Display {
+	pub fn position_at_mean_anomaly(&self, handle: &H, mean_anomaly: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
 		let zero = T::from_f32(0.0).unwrap();
 		let one = T::from_f32(1.0).unwrap();
 		let two = T::from_f32(2.0).unwrap();
@@ -138,8 +138,21 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			return Vector3::new(zero, zero, zero);
 		}
 	}
+	pub fn absolute_position_at_time(&self, handle: &H, time: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
+		let zero = T::from_f32(0.0).unwrap();
+		if let Some(entry) = self.bodies.get(&handle) {
+			let mean_anomaly = entry.mean_anomaly_at_epoch;
+			let parent_position = match &entry.parent {
+				Some(parent_handle) => self.absolute_position_at_time(parent_handle, time),
+				None => Vector3::new(zero, zero, zero),
+			};
+			return self.position_at_mean_anomaly(handle, mean_anomaly) + parent_position;
+		} else {
+			return Vector3::new(zero, zero, zero);
+		}
+	}
 	/// Calculate the radius of the sphere of influence of the body with the given handle
-	pub fn radius_soi(&self, handle: H) -> T {
+	pub fn radius_soi(&self, handle: &H) -> T {
 		let orbiting_body = self.bodies.get(&handle).unwrap();
 		let orbiting_body_info = orbiting_body.info.clone();
 		if let Some(orbit) = &orbiting_body.orbit {

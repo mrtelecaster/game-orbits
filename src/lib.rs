@@ -19,5 +19,9 @@ mod elements; pub use elements::*;
 #[cfg(test)]
 mod problems;
 
+#[cfg(feature="bevy")]
+mod feat_bevy;
+#[cfg(feature="bevy")]
+pub use feat_bevy::*;
 #[cfg(feature="godot")]
 pub mod feat_godot;
