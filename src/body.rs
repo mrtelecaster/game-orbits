@@ -61,6 +61,9 @@ impl<T> Body<T> where T: Float + FromPrimitive
     pub fn radius_polar_km(&self) -> T {
         self.radius_polar_km
     }
+	pub fn radius_avg_km(&self) -> T {
+		(self.radius_polar_km + self.radius_equator_km) / T::from_f32(2.0).unwrap()
+	}
     /// Gets the radius of this body in meters, *m*
     pub fn radius_equator_m(&self) -> T {
         self.radius_equator_km * T::from_f64(constants::CONVERT_KM_TO_M).unwrap()

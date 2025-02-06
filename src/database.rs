@@ -1,4 +1,4 @@
-use std::{collections::{hash_map::Iter, HashMap}, hash::Hash, ops::Mul};
+use std::{collections::{hash_map::Iter, HashMap}, fmt::Display, hash::Hash, ops::Mul};
 use nalgebra::{RealField, Rotation3, SimdRealField, SimdValue, Vector3};
 use num_traits::{Float, FromPrimitive};
 use crate::{constants::f64::CONVERT_DEG_TO_RAD, Body, OrbitalElements};
@@ -37,7 +37,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	pub fn with_sol(mut self) -> Self {
 		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
 		let sun_info: Body<T> = Body::new_sol();
-		let sun_entry = DatabaseEntry::new(sun_info).with_scale(T::from_f64(1.0 / 5_000_000_000.0).unwrap());
+		let sun_entry = DatabaseEntry::new(sun_info).with_scale(T::from_f64(1.0 / 100_000_000.0).unwrap());
 		self.add_entry(sun_handle.clone(), sun_entry);
 		self
 	}
@@ -84,7 +84,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let earth_handle = H::from_u16(HANDLE_EARTH).unwrap();
 		let earth_info: Body<T> = Body::new_earth();
 		let earth_orbit: OrbitalElements<T> = OrbitalElements::default()
-			.with_semimajor_axis_km(T::from_f64(149598023.0).unwrap())
+			.with_semimajor_axis_km(T::from_f64(149_598_023.0).unwrap())
 			.with_eccentricity(T::from_f64(0.0167086).unwrap())
 			.with_inclination_deg(T::from_f64(0.00005).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(114.20783).unwrap())
@@ -98,14 +98,14 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_mass_kg(T::from_f64(7.346e22).unwrap())
 			.with_radius_km(T::from_f64(1737.4).unwrap());
 		let moon_orbit: OrbitalElements<T> = OrbitalElements::default()
-			.with_semimajor_axis_km(T::from_f64(384399.0).unwrap())
+			.with_semimajor_axis_km(T::from_f64(384_399.0).unwrap())
 			.with_eccentricity(T::from_f64(0.0549).unwrap())
 			.with_inclination_deg(T::from_f64(5.145).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(114.20783).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(-11.26064).unwrap());
 		let moon_entry = DatabaseEntry::new(moon_info)
 			.with_parent(earth_handle.clone(), moon_orbit)
-			.with_mean_anomaly_deg(T::from_f64(358.617).unwrap());
+			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
 		self.add_entry(moon_handle, moon_entry);
 		self
 	}
@@ -118,19 +118,14 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		self.bodies.get(&handle).unwrap()
 	}
 	/// Gets the position of the given body at the given mean anomaly value
-	pub fn position_at_mean_anomaly(&self, handle: H, mean_anomaly: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
+	pub fn position_at_mean_anomaly(&self, handle: H, mean_anomaly: T) -> Vector3<T> where H: Display, T: RealField + SimdValue + SimdRealField + Display {
 		let zero = T::from_f32(0.0).unwrap();
 		let one = T::from_f32(1.0).unwrap();
 		let two = T::from_f32(2.0).unwrap();
 		let orbiting_body = self.bodies.get(&handle).unwrap();
 		if let Some(orbit) = &orbiting_body.orbit {
-			let parent_handle = orbiting_body.parent.clone().unwrap();
-			let parent_body = self.bodies.get(&parent_handle).unwrap();
-			let parent_position = self.position_at_mean_anomaly(parent_handle, mean_anomaly);
 			let true_anomaly = mean_anomaly + two * orbit.eccentricity * Float::sin(mean_anomaly) + T::from_f64(1.25).unwrap() * Float::powi(orbit.eccentricity, 2) * Float::sin(two * mean_anomaly);
 			let radius = orbit.semimajor_axis * (one - Float::powi(orbit.eccentricity, 2)) / (one + orbit.eccentricity * Float::cos(true_anomaly));
-			let scale = parent_body.scale;
-			let game_radius = radius * scale;
 			let rot_true_anomaly = Rotation3::new(Vector3::new(zero, one, zero) * true_anomaly);
 			let rot_long_of_ascending_node = Rotation3::new(Vector3::new(zero, one, zero) * orbit.long_of_ascending_node);
 			let dir_ascending_node = rot_long_of_ascending_node * Vector3::new(one, zero, zero);
@@ -138,7 +133,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			let rot_inclination = Rotation3::new(dir_ascending_node * orbit.inclination);
 			let rot_arg_of_periapsis = Rotation3::new(dir_normal * orbit.arg_of_periapsis);
 			let direction = rot_inclination * rot_arg_of_periapsis * rot_true_anomaly * Vector3::new(one, zero, zero);
-			return direction * game_radius + parent_position;
+			return direction * radius;
 		} else {
 			return Vector3::new(zero, zero, zero);
 		}
