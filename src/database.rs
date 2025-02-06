@@ -8,6 +8,9 @@ use bevy::prelude::*;
 
 pub const HANDLE_SOL: u16 = 0;
 pub const HANDLE_MERCURY: u16 = 1;
+pub const HANDLE_VENUS: u16 = 2;
+pub const HANDLE_EARTH: u16 = 3;
+pub const HANDLE_LUNA: u16 = 4;
 
 /// Holds the data for all the bodies being simulated
 /// 
@@ -60,7 +63,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	/// Adds the planet venus to the database
 	pub fn with_venus(mut self) -> Self {
 		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
-		let venus_handle = H::from_u16(2).unwrap();
+		let venus_handle = H::from_u16(HANDLE_VENUS).unwrap();
 		let venus_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(4.8675e24).unwrap())
 			.with_radius_km(T::from_f64(6051.8).unwrap());
@@ -78,7 +81,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	}
 	pub fn with_earth(mut self) -> Self {
 		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
-		let earth_handle = H::from_u16(3).unwrap();
+		let earth_handle = H::from_u16(HANDLE_EARTH).unwrap();
 		let earth_info: Body<T> = Body::new_earth();
 		let earth_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(149598023.0).unwrap())
@@ -89,7 +92,21 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let earth_entry = DatabaseEntry::new(earth_info)
 			.with_parent(sun_handle.clone(), earth_orbit)
 			.with_mean_anomaly_deg(T::from_f64(358.617).unwrap());
-		self.add_entry(earth_handle, earth_entry);
+		self.add_entry(earth_handle.clone(), earth_entry);
+		let moon_handle = H::from_u16(HANDLE_LUNA).unwrap();
+		let moon_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(7.346e22).unwrap())
+			.with_radius_km(T::from_f64(1737.4).unwrap());
+		let moon_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(384399.0).unwrap())
+			.with_eccentricity(T::from_f64(0.0549).unwrap())
+			.with_inclination_deg(T::from_f64(5.145).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(114.20783).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(-11.26064).unwrap());
+		let moon_entry = DatabaseEntry::new(moon_info)
+			.with_parent(earth_handle.clone(), moon_orbit)
+			.with_mean_anomaly_deg(T::from_f64(358.617).unwrap());
+		self.add_entry(moon_handle, moon_entry);
 		self
 	}
 	/// Adds a new entry to the database
