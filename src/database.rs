@@ -43,6 +43,21 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(sun_handle.clone(), mercury_orbit)
 			.with_mean_anomaly_deg(T::from_f64(174.796).unwrap());
 		db.add_entry(mercury_handle, mercury_entry);
+		// venus
+		let venus_handle = H::from_u16(2).unwrap();
+		let venus_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(4.8675e24).unwrap())
+			.with_radius_km(T::from_f64(6051.8).unwrap());
+		let venus_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(1.0821e8).unwrap())
+			.with_eccentricity(T::from_f64(0.006772).unwrap())
+			.with_inclination_deg(T::from_f64(3.39458).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(54.884).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(76.680).unwrap());
+		let venus_entry = DatabaseEntry::new(venus_info)
+			.with_parent(sun_handle.clone(), venus_orbit)
+			.with_mean_anomaly_deg(T::from_f64(	50.115).unwrap());
+		db.add_entry(venus_handle, venus_entry);
 		// earth
 		let earth_handle = H::from_u16(3).unwrap();
 		let earth_info: Body<T> = Body::new_earth();
