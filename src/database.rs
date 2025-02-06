@@ -78,26 +78,47 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	pub fn add_entry(&mut self, handle: H, entry: DatabaseEntry<H, T>) {
 		self.bodies.insert(handle, entry);
 	}
+	/// Gets the entry from the database with the given handle
+	pub fn get_entry(&self, handle: H) -> &DatabaseEntry<H, T> {
+		self.bodies.get(&handle).unwrap()
+	}
 	/// Gets the position of the given body at the given mean anomaly value
 	pub fn position_at_mean_anomaly(&self, handle: H, mean_anomaly: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
 		let zero = T::from_f64(0.0).unwrap();
 		let one = T::from_f64(1.0).unwrap();
 		let two = T::from_f64(2.0).unwrap();
 		let orbiting_body = self.bodies.get(&handle).unwrap();
-		let parent_body = self.bodies.get(&orbiting_body.parent.clone().unwrap()).unwrap();
-		let orbit = &orbiting_body.orbit.clone().unwrap();
-		let true_anomaly = mean_anomaly + two * orbit.eccentricity * Float::sin(mean_anomaly) + T::from_f64(1.25).unwrap() * Float::powi(orbit.eccentricity, 2) * Float::sin(two * mean_anomaly);
-		let radius = orbit.semimajor_axis * (one - Float::powi(orbit.eccentricity, 2)) / (one + orbit.eccentricity * Float::cos(true_anomaly));
-		let scale = parent_body.scale;
-		let game_radius = radius * scale;
-		let rot_true_anomaly = Rotation3::new(Vector3::new(zero, one, zero) * true_anomaly);
-		let rot_long_of_ascending_node = Rotation3::new(Vector3::new(zero, one, zero) * orbit.long_of_ascending_node);
-		let dir_ascending_node = rot_long_of_ascending_node * Vector3::new(one, zero, zero);
-		let dir_normal = Vector3::new(one, zero, zero).cross(&dir_ascending_node);
-		let rot_inclination = Rotation3::new(dir_ascending_node * orbit.inclination);
-		let rot_arg_of_periapsis = Rotation3::new(dir_normal * orbit.arg_of_periapsis);
-		let direction = rot_inclination * rot_arg_of_periapsis * rot_true_anomaly * Vector3::new(one, zero, zero);
-		return direction * game_radius;
+		if let Some(orbit) = &orbiting_body.orbit {
+			let parent_body = self.bodies.get(&orbiting_body.parent.clone().unwrap()).unwrap();
+			let true_anomaly = mean_anomaly + two * orbit.eccentricity * Float::sin(mean_anomaly) + T::from_f64(1.25).unwrap() * Float::powi(orbit.eccentricity, 2) * Float::sin(two * mean_anomaly);
+			let radius = orbit.semimajor_axis * (one - Float::powi(orbit.eccentricity, 2)) / (one + orbit.eccentricity * Float::cos(true_anomaly));
+			let scale = parent_body.scale;
+			let game_radius = radius * scale;
+			let rot_true_anomaly = Rotation3::new(Vector3::new(zero, one, zero) * true_anomaly);
+			let rot_long_of_ascending_node = Rotation3::new(Vector3::new(zero, one, zero) * orbit.long_of_ascending_node);
+			let dir_ascending_node = rot_long_of_ascending_node * Vector3::new(one, zero, zero);
+			let dir_normal = Vector3::new(one, zero, zero).cross(&dir_ascending_node);
+			let rot_inclination = Rotation3::new(dir_ascending_node * orbit.inclination);
+			let rot_arg_of_periapsis = Rotation3::new(dir_normal * orbit.arg_of_periapsis);
+			let direction = rot_inclination * rot_arg_of_periapsis * rot_true_anomaly * Vector3::new(one, zero, zero);
+			return direction * game_radius;
+		} else {
+			return Vector3::new(zero, zero, zero);
+		}
+	}
+	/// Calculate the radius of the sphere of influence of the body with the given handle
+	pub fn radius_soi(&self, handle: H) -> T {
+		let orbiting_body = self.bodies.get(&handle).unwrap();
+		let orbiting_body_info = orbiting_body.info.clone();
+		if let Some(orbit) = &orbiting_body.orbit {
+			let parent_body = self.bodies.get(&orbiting_body.parent.clone().unwrap()).unwrap();
+			let parent_body_info = parent_body.info.clone();
+			let exponent = T::from_f64(2.0 / 5.0).unwrap();
+			return orbit.semimajor_axis * (orbiting_body_info.mass_kg() / parent_body_info.mass_kg()).powf(exponent);
+		} else {
+			let minimum_gravity = T::from_f64(0.0000005).unwrap();
+			return orbiting_body_info.distance_of_gravity(minimum_gravity);
+		}
 	}
 	pub fn iter(&self) -> Iter<'_, H, DatabaseEntry<H, T>> {
 		self.bodies.iter()

@@ -4,6 +4,7 @@ use crate::{constants::f64 as constants};
 
 
 /// A body in space represented as an idealized sphere
+#[derive(Clone)]
 pub struct Body<T> {
     /// Mass of this body in kilograms (kg)
     mass_kg: T,

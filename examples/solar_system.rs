@@ -9,14 +9,13 @@ const PERIAPSIS_COLOR: Color = Color::srgb(1.0, 0.5, 0.0);
 const APOAPSIS_COLOR: Color = Color::srgb(0.0, 0.5, 1.0);
 const PLANET_COLOR: Color = Color::srgb(1.0, 1.0, 1.0);
 const SUN_COLOR: Color = Color::srgb(1.0, 1.0, 0.0);
-const APSIS_SIZE: f32 = 0.5;
-const PLANET_SIZE: f32 = 1.0;
+const APSIS_SIZE: f32 = 0.2;
 
 
 fn setup_camera(mut commands: Commands) {
 	commands.spawn((
 		Camera3d::default(),
-		Transform::from_xyz(0.0, 100.0, -1.0).looking_at(Vec3::ZERO, Vec3::Y),
+		Transform::from_xyz(50.0, 50.0, -100.0).looking_at(Vec3::ZERO, Vec3::Y),
 	));
 }
 
@@ -48,12 +47,13 @@ fn draw_orbits(mut gizmos: Gizmos, db: Res<Database<usize, f32>>) {
 }
 
 fn draw_planets(mut gizmos: Gizmos, db: Res<Database<usize, f32>>) {
+	let sun = db.get_entry(0);
+	let scale = sun.scale;
 	for (handle, entry) in db.iter() {
-		if let Some(orbit) = entry.orbit {
-			let pos_nalgebra = db.position_at_mean_anomaly(*handle, entry.mean_anomaly_at_epoch);
-			let pos = Vec3::new(pos_nalgebra.x, pos_nalgebra.y, pos_nalgebra.z);
-			gizmos.sphere(pos, PLANET_SIZE, PLANET_COLOR);
-		}
+		let pos_nalgebra = db.position_at_mean_anomaly(*handle, entry.mean_anomaly_at_epoch);
+		let pos = Vec3::new(pos_nalgebra.x, pos_nalgebra.y, pos_nalgebra.z);
+		let soi_radius = db.radius_soi(*handle);
+		gizmos.sphere(pos, soi_radius * scale, PLANET_COLOR);
 	}
 }
 
