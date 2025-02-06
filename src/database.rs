@@ -1,7 +1,7 @@
-use std::{collections::{hash_map::Iter, HashMap}, hash::Hash};
+use std::{collections::{hash_map::Iter, HashMap}, hash::Hash, ops::Mul};
 use nalgebra::{RealField, Rotation3, SimdRealField, SimdValue, Vector3};
 use num_traits::{Float, FromPrimitive};
-use crate::{Body, OrbitalElements};
+use crate::{constants::f64::CONVERT_DEG_TO_RAD, Body, OrbitalElements};
 
 #[cfg(feature="bevy")]
 use bevy::prelude::*;
@@ -39,7 +39,9 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(7.005).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(29.124).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(48.331).unwrap());
-		let mercury_entry = DatabaseEntry::new(mercury_info).with_parent(sun_handle.clone(), mercury_orbit);
+		let mercury_entry = DatabaseEntry::new(mercury_info)
+			.with_parent(sun_handle.clone(), mercury_orbit)
+			.with_mean_anomaly_deg(T::from_f64(174.796).unwrap());
 		db.add_entry(mercury_handle, mercury_entry);
 		// earth
 		let earth_handle = H::from_u16(3).unwrap();
@@ -50,7 +52,9 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(0.00005).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(114.20783).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(-11.26064).unwrap());
-		let earth_entry = DatabaseEntry::new(earth_info).with_parent(sun_handle.clone(), earth_orbit);
+		let earth_entry = DatabaseEntry::new(earth_info)
+			.with_parent(sun_handle.clone(), earth_orbit)
+			.with_mean_anomaly_deg(T::from_f64(358.617).unwrap());
 		db.add_entry(earth_handle, earth_entry);
 		// return database
 		db
@@ -95,13 +99,14 @@ pub struct DatabaseEntry<H, T> {
 	pub parent: Option<H>,
 	pub info: Body<T>,
 	pub orbit: Option<OrbitalElements<T>>,
+	pub mean_anomaly_at_epoch: T,
 	pub scale: T,
 }
-impl<H, T> DatabaseEntry<H, T> where T: FromPrimitive {
+impl<H, T> DatabaseEntry<H, T> where T: FromPrimitive + Mul<T, Output=T> {
 	pub fn new(info: Body<T>) -> Self {
 		Self{
 			info,
-			parent: None, orbit: None,
+			parent: None, orbit: None, mean_anomaly_at_epoch: T::from_f64(0.0).unwrap(),
 			scale: T::from_f64(1.0 / 3_000_000.0).unwrap(),
 		}
 	}
@@ -112,6 +117,10 @@ impl<H, T> DatabaseEntry<H, T> where T: FromPrimitive {
 	}
 	pub fn with_scale(mut self, scale: T) -> Self {
 		self.scale = scale;
+		self
+	}
+	pub fn with_mean_anomaly_deg(mut self, mean_anomaly: T) -> Self {
+		self.mean_anomaly_at_epoch = mean_anomaly * T::from_f64(CONVERT_DEG_TO_RAD).unwrap();
 		self
 	}
 }
