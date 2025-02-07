@@ -12,20 +12,20 @@ const CAM_ROTATE_RIGHT: KeyCode = KeyCode::ArrowRight;
 const CAM_ZOOM_IN: KeyCode = KeyCode::Equal;
 const CAM_ZOOM_OUT: KeyCode = KeyCode::Minus;
 const CAM_MAX_PITCH: f32 = 1.55; // rad
-const CAM_ROTATE_SPEED: f32 = 1.0; // rad/s
+const CAM_ROTATE_SPEED: f32 = 0.1; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.4;
-const CAM_MAX_DISTANCE: f32 = 10000.0;
-const CAM_ZOOM_SPEED: f32 = 0.1;
-const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_SATURN as usize;
+const CAM_MAX_DISTANCE: f32 = 100000.0;
+const CAM_ZOOM_SPEED: f32 = 0.01;
+const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_EARTH as usize;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
 const PERIAPSIS_COLOR: Color = Color::srgb(1.0, 0.5, 0.0);
 const APOAPSIS_COLOR: Color = Color::srgb(0.0, 0.5, 1.0);
-const PLANET_COLOR: Color = Color::srgb(0.5, 0.0, 1.0);
+const PLANET_COLOR: Color = Color::srgb(1.0, 0.1, 0.5);
 const SOI_COLOR: Color = Color::srgb(1.0, 1.0, 1.0);
 const APSIS_SIZE_MIN: f32 = 0.01;
-const APSIS_SIZE_MAX: f32 = 50.0;
+const APSIS_SIZE_MAX: f32 = 500.0;
 
 type Database = BevyPlanetDatabase<usize>;
 

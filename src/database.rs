@@ -12,11 +12,11 @@ pub mod handles
 	pub const HANDLE_MERCURY: u16 = 1;
 	pub const HANDLE_VENUS: u16 = 2;
 	pub const HANDLE_EARTH: u16 = 3;
-	pub const HANDLE_LUNA: u16 = 4;
-	pub const HANDLE_MARS: u16 = 5;
-	pub const HANDLE_PHOBOS: u16 = 6;
-	pub const HANDLE_DEIMOS: u16 = 7;
-	pub const HANDLE_JUPITER: u16 = 8;
+	pub const HANDLE_LUNA: u16 = HANDLE_EARTH + 1;
+	pub const HANDLE_MARS: u16 = HANDLE_EARTH + 2;
+	pub const HANDLE_PHOBOS: u16 = HANDLE_MARS + 1;
+	pub const HANDLE_DEIMOS: u16 = HANDLE_MARS + 2;
+	pub const HANDLE_JUPITER: u16 = HANDLE_MARS + 3;
 	pub const HANDLE_IO: u16 = HANDLE_JUPITER + 1;
 	pub const HANDLE_EUROPA: u16 = HANDLE_JUPITER + 2;
 	pub const HANDLE_GANYMEDE: u16 = HANDLE_JUPITER + 3;
@@ -43,7 +43,24 @@ pub mod handles
 	pub const HANDLE_PANDIA: u16 = HANDLE_JUPITER + 65;
 	pub const HANDLE_ERSA: u16 = HANDLE_JUPITER + 71;
 	pub const HANDLE_S_2011_J_1: u16 = HANDLE_JUPITER + 72;
-	pub const HANDLE_SATURN: u16 = 104;
+	pub const HANDLE_SATURN: u16 = HANDLE_JUPITER + 97;
+	pub const HANDLE_MIMAS: u16 = HANDLE_SATURN + 1;
+	pub const HANDLE_ENCELADUS: u16 = HANDLE_SATURN + 2;
+	pub const HANDLE_TETHYS: u16 = HANDLE_SATURN + 3;
+	pub const HANDLE_DIONE: u16 = HANDLE_SATURN + 4;
+	pub const HANDLE_RHEA: u16 = HANDLE_SATURN + 5;
+	pub const HANDLE_TITAN: u16 = HANDLE_SATURN + 6;
+	pub const HANDLE_HYPERION: u16 = HANDLE_SATURN + 7;
+	pub const HANDLE_IAPETUS: u16 = HANDLE_SATURN + 8;
+	pub const HANDLE_PHOEBE: u16 = HANDLE_SATURN + 9;
+	pub const HANDLE_JANUS: u16 = HANDLE_SATURN + 10;
+	pub const HANDLE_GEIRROD: u16 = HANDLE_SATURN + 66;
+	pub const HANDLE_URANUS: u16 = HANDLE_SATURN + 148;
+	pub const HANDLE_ARIEL: u16 = HANDLE_URANUS + 1;
+	pub const HANDLE_CUPID: u16 = HANDLE_URANUS + 27;
+	pub const HANDLE_NEPTUNE: u16 = HANDLE_URANUS + 28;
+	pub const HANDLE_TRITON: u16 = HANDLE_NEPTUNE + 1;
+	pub const HANDLE_HIPPOCAMP: u16 = HANDLE_NEPTUNE + 14;
 }
 
 /// Holds the data for all the bodies being simulated
@@ -69,6 +86,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_mars()
 			.with_jupiter()
 			.with_saturn()
+			.with_uranus()
+			.with_neptune()
 	}
 	/// Adds our sun to the database
 	pub fn with_sol(mut self) -> Self {
@@ -359,6 +378,52 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(sun_handle.clone(), saturn_orbit)
 			.with_mean_anomaly_deg(T::from_f64(317.020).unwrap());
 		self.add_entry(saturn_handle.clone(), saturn_entry);
+		// return
+		self
+	}
+	/// Adds Uranus and its moons to the system
+	/// 
+	/// References [Wikipedia's list of Uranian moons](https://en.wikipedia.org/wiki/Moons_of_Uranus#List)
+	pub fn with_uranus(mut self) -> Self {
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		// saturn
+		let uranus_handle = H::from_u16(handles::HANDLE_URANUS).unwrap();
+		let uranus_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(8.6810e25).unwrap())
+			.with_radius_km(T::from_f64(25362.0).unwrap());
+		let uranus_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_au(T::from_f64(19.19126).unwrap())
+			.with_eccentricity(T::from_f64(0.04717).unwrap())
+			.with_inclination_deg(T::from_f64(0.773).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(96.998857).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(74.006).unwrap());
+		let uranus_entry = DatabaseEntry::new(uranus_info)
+			.with_parent(sun_handle.clone(), uranus_orbit)
+			.with_mean_anomaly_deg(T::from_f64(142.238600).unwrap());
+		self.add_entry(uranus_handle.clone(), uranus_entry);
+		// return
+		self
+	}
+	/// Adds Neptune and its moons to the system
+	/// 
+	/// References [Wikipedia's list of Neptunian moons](https://en.wikipedia.org/wiki/Moons_of_Neptune#List)
+	pub fn with_neptune(mut self) -> Self {
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		// saturn
+		let neptune_handle = H::from_u16(handles::HANDLE_NEPTUNE).unwrap();
+		let neptune_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(5.6834e26).unwrap())
+			.with_radius_km(T::from_f64(69911.5).unwrap());
+		let neptune_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_au(T::from_f64(30.07).unwrap())
+			.with_eccentricity(T::from_f64(0.008678).unwrap())
+			.with_inclination_deg(T::from_f64(1.770).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(273.187).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(131.783).unwrap());
+		let neptune_entry = DatabaseEntry::new(neptune_info)
+			.with_parent(sun_handle.clone(), neptune_orbit)
+			.with_mean_anomaly_deg(T::from_f64(317.020).unwrap());
+		self.add_entry(neptune_handle.clone(), neptune_entry);
 		// return
 		self
 	}
