@@ -17,6 +17,17 @@ generating meshes at runtime for different texture projections, and tools for
 projecting astrometric data from NASA and other organizations into textures for
 use in games.
 
+### Usability
+
+I do not recommend using this library in your projects currently. It's a bit of
+a mess and the interface isn't very friendly and will likely change drastically
+as I start to actually use it for its intended purpose in my own games and make
+improvements based on that. However if you would like to use it eventually and
+have feedback on something you'd like the library to do, or on how you'd like
+the interface with the library to ideally function, I would love to hear it!
+Also, feedback/advice on how to more cleanly integrate the game engine feature
+flags would be very welcome.
+
 ## Tests
 
 Due to a limitation of `cargo` combined with the fact that I use the Bevy engine
