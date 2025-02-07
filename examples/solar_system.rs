@@ -11,6 +11,7 @@ const CAM_ROTATE_LEFT: KeyCode = KeyCode::ArrowLeft;
 const CAM_ROTATE_RIGHT: KeyCode = KeyCode::ArrowRight;
 const CAM_ZOOM_IN: KeyCode = KeyCode::Equal;
 const CAM_ZOOM_OUT: KeyCode = KeyCode::Minus;
+const CAM_MAX_PITCH: f32 = 1.55; // rad
 const CAM_ROTATE_SPEED: f32 = 1.0; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.4;
 const CAM_MAX_DISTANCE: f32 = 10000.0;
@@ -69,6 +70,7 @@ fn process_input(
 ){
 	let delta = time.delta_secs();
 	let mut camera_parent = camera_parents.single_mut();
+	// handle rotation inputs
 	if keyboard.pressed(CAM_ROTATE_RIGHT) {
 		camera_parent.yaw += CAM_ROTATE_SPEED * delta;
 	}
@@ -81,7 +83,8 @@ fn process_input(
 	if keyboard.pressed(CAM_ROTATE_DOWN) {
 		camera_parent.pitch -= CAM_ROTATE_SPEED * delta;
 	}
-	camera_parent.pitch = camera_parent.pitch.clamp(-PI/2.0, PI/2.0);
+	camera_parent.pitch = camera_parent.pitch.clamp(-CAM_MAX_PITCH, CAM_MAX_PITCH);
+	// handle zoom inputs
 	if keyboard.pressed(CAM_ZOOM_IN) {
 		camera_parent.zoom -= CAM_ZOOM_SPEED * delta;
 	}
