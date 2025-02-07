@@ -1,6 +1,6 @@
 use std::f32::consts::{PI, TAU};
 use bevy::prelude::*;
-use game_orbits::BevyPlanetDatabase;
+use game_orbits::{BevyPlanetDatabase, handles::*};
 
 
 const SCALE: f32 = 1.0 / 100_000_000.0;
@@ -15,6 +15,7 @@ const CAM_ROTATE_SPEED: f32 = 1.0; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.4;
 const CAM_MAX_DISTANCE: f32 = 10000.0;
 const CAM_ZOOM_SPEED: f32 = 0.1;
+const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_EARTH as usize;
 
 const ORBIT_SEGMENTS: usize = 200;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
@@ -22,7 +23,8 @@ const PERIAPSIS_COLOR: Color = Color::srgb(1.0, 0.5, 0.0);
 const APOAPSIS_COLOR: Color = Color::srgb(0.0, 0.5, 1.0);
 const PLANET_COLOR: Color = Color::srgb(0.5, 0.0, 1.0);
 const SOI_COLOR: Color = Color::srgb(1.0, 1.0, 1.0);
-const APSIS_SIZE: f32 = 0.5;
+const APSIS_SIZE_MIN: f32 = 0.01;
+const APSIS_SIZE_MAX: f32 = 50.0;
 
 type Database = BevyPlanetDatabase<usize>;
 
@@ -57,7 +59,7 @@ fn setup_camera(mut commands: Commands) {
 	commands.spawn((
 		Transform::default(),
 		Visibility::default(),
-		CameraParent::default().centered_on(4),
+		CameraParent::default().centered_on(CAM_CENTERED_ON_DEFAULT),
 	)).add_child(camera);
 }
 
@@ -107,7 +109,10 @@ fn update_camera_position(
 	camera_transform.look_at(Vec3::ZERO, Vec3::Y);
 }
 
-fn draw_orbits(mut gizmos: Gizmos, db: Res<Database>) {
+fn draw_orbits(
+	mut gizmos: Gizmos, db: Res<Database>, camera_parents: Query<&CameraParent>,
+) {
+	let camera_parent = camera_parents.single();
 	let step = TAU / (ORBIT_SEGMENTS-1) as f32;
 	for (handle, entry) in db.iter() {
 		if let Some(parent_handle) = entry.parent {
@@ -123,22 +128,21 @@ fn draw_orbits(mut gizmos: Gizmos, db: Res<Database>) {
 			// draw apoapsis/periapsis
 			let pos_periapsis = db.position_at_mean_anomaly(handle, 0.0) * SCALE;
 			let pos_apoapsis = db.position_at_mean_anomaly(handle, PI) * SCALE;
-			gizmos.sphere(pos_periapsis + parent_pos, APSIS_SIZE, PERIAPSIS_COLOR);
-			gizmos.sphere(pos_apoapsis + parent_pos, APSIS_SIZE, APOAPSIS_COLOR);
+			let apsis_size = APSIS_SIZE_MIN.lerp(APSIS_SIZE_MAX, camera_parent.zoom.powf(3.0));
+			gizmos.sphere(pos_periapsis + parent_pos, apsis_size, PERIAPSIS_COLOR);
+			gizmos.sphere(pos_apoapsis + parent_pos, apsis_size, APOAPSIS_COLOR);
 		}
 	}
 }
 
 fn draw_planets(mut gizmos: Gizmos, db: Res<Database>) {
-	let sun = db.get_entry(&0);
-	let scale = sun.scale;
 	for (handle, entry) in db.iter() {
 		let pos = db.absolute_position_at_time(handle, 0.0) * SCALE;
 		let soi_radius = db.radius_soi(handle);
 		let info = entry.info.clone();
 		// info!("Scale radius: {} units", info.radius_avg_km() * scale);
-		gizmos.sphere(pos, soi_radius * scale, SOI_COLOR); // sphere of influence
-		gizmos.sphere(pos, info.radius_avg_km() * scale, PLANET_COLOR);
+		gizmos.sphere(pos, soi_radius * SCALE, SOI_COLOR); // sphere of influence
+		gizmos.sphere(pos, info.radius_avg_km() * SCALE, PLANET_COLOR);
 	}
 }
 

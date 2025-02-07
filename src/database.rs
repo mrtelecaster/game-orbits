@@ -6,11 +6,17 @@ use crate::{constants::f64::CONVERT_DEG_TO_RAD, Body, OrbitalElements};
 #[cfg(feature="bevy")]
 use bevy::prelude::*;
 
-pub const HANDLE_SOL: u16 = 0;
-pub const HANDLE_MERCURY: u16 = 1;
-pub const HANDLE_VENUS: u16 = 2;
-pub const HANDLE_EARTH: u16 = 3;
-pub const HANDLE_LUNA: u16 = 4;
+pub mod handles
+{
+	pub const HANDLE_SOL: u16 = 0;
+	pub const HANDLE_MERCURY: u16 = 1;
+	pub const HANDLE_VENUS: u16 = 2;
+	pub const HANDLE_EARTH: u16 = 3;
+	pub const HANDLE_LUNA: u16 = 4;
+	pub const HANDLE_MARS: u16 = 5;
+	pub const HANDLE_PHOBOS: u16 = 6;
+	pub const HANDLE_DEIMOS: u16 = 7;
+}
 
 /// Holds the data for all the bodies being simulated
 /// 
@@ -32,10 +38,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_mercury()
 			.with_venus()
 			.with_earth()
+			.with_mars()
 	}
 	/// Adds our sun to the database
 	pub fn with_sol(mut self) -> Self {
-		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let sun_info: Body<T> = Body::new_sol();
 		let sun_entry = DatabaseEntry::new(sun_info).with_scale(T::from_f64(1.0 / 100_000_000.0).unwrap());
 		self.add_entry(sun_handle.clone(), sun_entry);
@@ -43,8 +50,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	}
 	/// Adds the planet mercury to the database
 	pub fn with_mercury(mut self) -> Self {
-		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
-		let mercury_handle = H::from_u16(HANDLE_MERCURY).unwrap();
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		let mercury_handle = H::from_u16(handles::HANDLE_MERCURY).unwrap();
 		let mercury_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(3.3011e23).unwrap())
 			.with_radius_km(T::from_f64(2439.7).unwrap());
@@ -62,8 +69,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	}
 	/// Adds the planet venus to the database
 	pub fn with_venus(mut self) -> Self {
-		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
-		let venus_handle = H::from_u16(HANDLE_VENUS).unwrap();
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		let venus_handle = H::from_u16(handles::HANDLE_VENUS).unwrap();
 		let venus_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(4.8675e24).unwrap())
 			.with_radius_km(T::from_f64(6051.8).unwrap());
@@ -80,8 +87,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		self
 	}
 	pub fn with_earth(mut self) -> Self {
-		let sun_handle = H::from_u16(HANDLE_SOL).unwrap();
-		let earth_handle = H::from_u16(HANDLE_EARTH).unwrap();
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		let earth_handle = H::from_u16(handles::HANDLE_EARTH).unwrap();
 		let earth_info: Body<T> = Body::new_earth();
 		let earth_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(149_598_023.0).unwrap())
@@ -93,7 +100,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(sun_handle.clone(), earth_orbit)
 			.with_mean_anomaly_deg(T::from_f64(358.617).unwrap());
 		self.add_entry(earth_handle.clone(), earth_entry);
-		let moon_handle = H::from_u16(HANDLE_LUNA).unwrap();
+		let moon_handle = H::from_u16(handles::HANDLE_LUNA).unwrap();
 		let moon_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(7.346e22).unwrap())
 			.with_radius_km(T::from_f64(1737.4).unwrap());
@@ -107,6 +114,56 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(earth_handle.clone(), moon_orbit)
 			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
 		self.add_entry(moon_handle, moon_entry);
+		self
+	}
+	pub fn with_mars(mut self) -> Self {
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		// mars
+		let mars_handle = H::from_u16(handles::HANDLE_MARS).unwrap();
+		let mars_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(6.4171e23).unwrap())
+			.with_radius_km(T::from_f64(3389.5).unwrap());
+		let mars_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(227_939_366.0).unwrap())
+			.with_eccentricity(T::from_f64(0.0934).unwrap())
+			.with_inclination_deg(T::from_f64(1.850).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(286.5).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(49.57854).unwrap());
+		let mars_entry = DatabaseEntry::new(mars_info)
+			.with_parent(sun_handle.clone(), mars_orbit)
+			.with_mean_anomaly_deg(T::from_f64(174.796).unwrap());
+		self.add_entry(mars_handle.clone(), mars_entry);
+		// phobos
+		let phobos_handle = H::from_u16(handles::HANDLE_PHOBOS).unwrap();
+		let phobos_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.060e16).unwrap())
+			.with_radius_km(T::from_f64(11.08).unwrap());
+		let phobos_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(9376.0).unwrap())
+			.with_eccentricity(T::from_f64(0.0151).unwrap())
+			.with_inclination_deg(T::from_f64(1.093).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(381.5236635).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(83.14323972).unwrap());
+		let phobos_entry = DatabaseEntry::new(phobos_info)
+			.with_parent(mars_handle.clone(), phobos_orbit)
+			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
+		self.add_entry(phobos_handle, phobos_entry);
+		// deimos
+		let deimos_handle = H::from_u16(handles::HANDLE_DEIMOS).unwrap();
+		let deimos_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.060e16).unwrap())
+			.with_radius_km(T::from_f64(11.08).unwrap());
+		let deimos_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(23463.2).unwrap())
+			.with_eccentricity(T::from_f64(0.00033).unwrap())
+			.with_inclination_deg(T::from_f64(0.93).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(386.1935449).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(80.97357149).unwrap());
+		let deimos_entry = DatabaseEntry::new(deimos_info)
+			.with_parent(mars_handle.clone(), deimos_orbit)
+			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+		self.add_entry(deimos_handle, deimos_entry);
+		// return
 		self
 	}
 	/// Adds a new entry to the database
