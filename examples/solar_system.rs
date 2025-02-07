@@ -12,10 +12,10 @@ const CAM_ROTATE_RIGHT: KeyCode = KeyCode::ArrowRight;
 const CAM_ZOOM_IN: KeyCode = KeyCode::Equal;
 const CAM_ZOOM_OUT: KeyCode = KeyCode::Minus;
 const CAM_MAX_PITCH: f32 = 1.55; // rad
-const CAM_ROTATE_SPEED: f32 = 0.1; // rad/s
+const CAM_ROTATE_SPEED: f32 = 0.8; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.4;
 const CAM_MAX_DISTANCE: f32 = 100000.0;
-const CAM_ZOOM_SPEED: f32 = 0.01;
+const CAM_ZOOM_SPEED: f32 = 0.08;
 const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_EARTH as usize;
 
 const ORBIT_SEGMENTS: usize = 100;
