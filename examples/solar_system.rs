@@ -16,7 +16,7 @@ const CAM_ROTATE_SPEED: f32 = 1.0; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.4;
 const CAM_MAX_DISTANCE: f32 = 10000.0;
 const CAM_ZOOM_SPEED: f32 = 0.1;
-const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_JUPITER as usize;
+const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_PASIPHAE as usize;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
@@ -145,7 +145,7 @@ fn draw_planets(mut gizmos: Gizmos, db: Res<Database>) {
 		let info = entry.info.clone();
 		// info!("Scale radius: {} units", info.radius_avg_km() * scale);
 		gizmos.sphere(pos, soi_radius * SCALE, SOI_COLOR); // sphere of influence
-		gizmos.sphere(pos, info.radius_avg_km() * SCALE, PLANET_COLOR);
+		gizmos.sphere(pos, info.radius_avg_m() * SCALE, PLANET_COLOR);
 	}
 }
 
