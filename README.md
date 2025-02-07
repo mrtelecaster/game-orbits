@@ -37,3 +37,9 @@ only compiled in the `dev` profile when running examples or tests, but it does
 mean the first time compiling unit tests will take a significant amount of time
 as it compiles Bevy along with the tests. Building the library itself or its
 documentation should be quite fast.
+
+## References
+
+- [*Orbital Mechanics*](http://www.braeunig.us/space/orbmech.htm) by Robert A. Braeunig
+- [OrbiterWiki](https://www.orbiterwiki.org/wiki/Main_Page) for orbital parameters for various moons
+- [Wikipedia](https://wikipedia.org) for its helpful diagrams of various concepts and generally being a great provider of free information
