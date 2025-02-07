@@ -31,8 +31,8 @@ impl<T> Body<T> where T: Float + FromPrimitive
 	pub fn new_sol() -> Self where T: FromPrimitive {
 		Self::new(
 			T::from_f64(constants::MASS_SUN_KG).unwrap(),
-			T::from_f64(constants::RADIUS_SUN_KM).unwrap(),
-			T::from_f64(constants::RADIUS_SUN_KM).unwrap(),
+			T::from_f64(constants::RADIUS_SUN_M * constants::CONVERT_M_TO_KM).unwrap(),
+			T::from_f64(constants::RADIUS_SUN_M * constants::CONVERT_M_TO_KM).unwrap(),
 		)
 	}
 	pub fn with_mass_kg(mut self, mass: T) -> Self {
@@ -69,6 +69,9 @@ impl<T> Body<T> where T: Float + FromPrimitive
     }
 	pub fn radius_avg_km(&self) -> T {
 		(self.radius_polar_km + self.radius_equator_km) / T::from_f32(2.0).unwrap()
+	}
+	pub fn radius_avg_m(&self) -> T {
+		self.radius_avg_km() * T::from_f64(constants::CONVERT_KM_TO_M).unwrap()
 	}
     /// Gets the radius of this body in meters, *m*
     pub fn radius_equator_m(&self) -> T {

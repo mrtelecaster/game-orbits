@@ -50,7 +50,7 @@ pub mod f64 {
 	pub const RADIUS_EARTH_EQUATOR_KM: f64 = 6378.137;
 	pub const RADIUS_EARTH_POLAR_KM: f64 = 6356.752;
 	pub const RADIUS_EARTH_MEAN_KM: f64 = 6371.0;
-	pub const RADIUS_SUN_KM: f64 = 6.957e8;
+	pub const RADIUS_SUN_M: f64 = 6.957e8;
 	pub const MASS_EARTH_KG: f64 = 5.972168e24;
 	pub const MASS_SUN_KG: f64 = 1.9885e30;
 }

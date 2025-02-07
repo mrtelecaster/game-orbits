@@ -17,10 +17,33 @@ pub mod handles
 	pub const HANDLE_PHOBOS: u16 = 6;
 	pub const HANDLE_DEIMOS: u16 = 7;
 	pub const HANDLE_JUPITER: u16 = 8;
-	pub const HANDLE_IO: u16 = 9;
-	pub const HANDLE_EUROPA: u16 = 10;
-	pub const HANDLE_GANYMEDE: u16 = 11;
-	pub const HANDLE_AMALTHEA: u16 = 12;
+	pub const HANDLE_IO: u16 = HANDLE_JUPITER + 1;
+	pub const HANDLE_EUROPA: u16 = HANDLE_JUPITER + 2;
+	pub const HANDLE_GANYMEDE: u16 = HANDLE_JUPITER + 3;
+	pub const HANDLE_CALLISTO: u16 = HANDLE_JUPITER + 4;
+	pub const HANDLE_AMALTHEA: u16 = HANDLE_JUPITER + 5;
+	pub const HANDLE_HIMALIA: u16 = HANDLE_JUPITER + 6;
+	pub const HANDLE_ELARA: u16 = HANDLE_JUPITER + 7;
+	pub const HANDLE_PASIPHAE: u16 = HANDLE_JUPITER + 8;
+	pub const HANDLE_SINOPE: u16 = HANDLE_JUPITER + 9;
+	pub const HANDLE_LYSITHAE: u16 = HANDLE_JUPITER + 10;
+	pub const HANDLE_CARME: u16 = HANDLE_JUPITER + 11;
+	pub const HANDLE_ANANKE: u16 = HANDLE_JUPITER + 12;
+	pub const HANDLE_LEDA: u16 = HANDLE_JUPITER + 13;
+	pub const HANDLE_THEBE: u16 = HANDLE_JUPITER + 14;
+	pub const HANDLE_ADRASTEA: u16 = HANDLE_JUPITER + 15;
+	pub const HANDLE_METIS: u16 = HANDLE_JUPITER + 16;
+	pub const HANDLE_CALLIRHOE: u16 = HANDLE_JUPITER + 17;
+	pub const HANDLE_THEMISTO: u16 = HANDLE_JUPITER + 18;
+	pub const HANDLE_CARPO: u16 = HANDLE_JUPITER + 46;
+	pub const HANDLE_EIRENE: u16 = HANDLE_JUPITER + 57;
+	pub const HANDLE_PHILOPHROSYNE: u16 = HANDLE_JUPITER + 59;
+	pub const HANDLE_EUPHEME: u16 = HANDLE_JUPITER + 60;
+	pub const HANDLE_VALETUDO: u16 = HANDLE_JUPITER + 62;
+	pub const HANDLE_PANDIA: u16 = HANDLE_JUPITER + 65;
+	pub const HANDLE_ERSA: u16 = HANDLE_JUPITER + 71;
+	pub const HANDLE_S_2011_J_1: u16 = HANDLE_JUPITER + 72;
+	pub const HANDLE_SATURN: u16 = 104;
 }
 
 /// Holds the data for all the bodies being simulated
@@ -45,6 +68,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_earth()
 			.with_mars()
 			.with_jupiter()
+			.with_saturn()
 	}
 	/// Adds our sun to the database
 	pub fn with_sol(mut self) -> Self {
@@ -172,9 +196,12 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		// return
 		self
 	}
+	/// Adds the planet jupiter to the database, with its moons
+	/// 
+	/// Referencing wikipedia's [list of Jupiter's moons](https://en.wikipedia.org/wiki/Moons_of_Jupiter#List)
 	pub fn with_jupiter(mut self) -> Self {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
-		// mars
+		// jupiter
 		let jupiter_handle = H::from_u16(handles::HANDLE_JUPITER).unwrap();
 		let jupiter_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(1.8982e27).unwrap())
@@ -219,6 +246,119 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(jupiter_handle.clone(), europa_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(europa_handle, europa_entry);
+		// Ganymede
+		let ganymede_handle = H::from_u16(handles::HANDLE_GANYMEDE).unwrap();
+		let ganymede_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.48e23).unwrap())
+			.with_radius_km(T::from_f64(2634.0).unwrap());
+		let ganymede_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(1070615470.44541).unwrap())
+			.with_eccentricity(T::from_f64(0.00158762974782861).unwrap())
+			.with_inclination_deg(T::from_f64(2.0381662).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(621.291691).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(341.6959921).unwrap());
+		let ganymede_entry = DatabaseEntry::new(ganymede_info)
+			.with_parent(jupiter_handle.clone(), ganymede_orbit)
+			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+		self.add_entry(ganymede_handle, ganymede_entry);
+		// Callisto
+		let callisto_handle = H::from_u16(handles::HANDLE_CALLISTO).unwrap();
+		let callisto_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.48e23).unwrap())
+			.with_radius_km(T::from_f64(2403.000).unwrap());
+		let callisto_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(1070615470.44541).unwrap())
+			.with_eccentricity(T::from_f64(0.00158762974782861).unwrap())
+			.with_inclination_deg(T::from_f64(2.0381662).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(621.291691).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(341.6959921).unwrap());
+		let callisto_entry = DatabaseEntry::new(callisto_info)
+			.with_parent(jupiter_handle.clone(), callisto_orbit)
+			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+		self.add_entry(callisto_handle, callisto_entry);
+		// Amalthea
+		let amalthea_handle = H::from_u16(handles::HANDLE_AMALTHEA).unwrap();
+		let amalthea_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(7.17e18).unwrap())
+			.with_radius_km(T::from_f64(101.000).unwrap());
+		let amalthea_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(181159256.1).unwrap())
+			.with_eccentricity(T::from_f64(0.000441428663648964).unwrap())
+			.with_inclination_deg(T::from_f64(2.55350793607894).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(414.339943282274).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(342.032315906764).unwrap());
+		let amalthea_entry = DatabaseEntry::new(amalthea_info)
+			.with_parent(jupiter_handle.clone(), amalthea_orbit)
+			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+		self.add_entry(amalthea_handle, amalthea_entry);
+		// Himalia
+		let himalia_handle = H::from_u16(handles::HANDLE_HIMALIA).unwrap();
+		let himalia_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(9.56e18).unwrap())
+			.with_radius_km(T::from_f64(93.150).unwrap());
+		let himalia_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(11394679431.4089).unwrap())
+			.with_eccentricity(T::from_f64(0.148020288964713).unwrap())
+			.with_inclination_deg(T::from_f64(30.4865631823591).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(405.592890277337).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(57.7865255776614).unwrap());
+		let himalia_entry = DatabaseEntry::new(himalia_info)
+			.with_parent(jupiter_handle.clone(), himalia_orbit)
+			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+		self.add_entry(himalia_handle, himalia_entry);
+		// Elara
+		let elara_handle = H::from_u16(handles::HANDLE_ELARA).unwrap();
+		let elara_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(7.77e17).unwrap())
+			.with_radius_km(T::from_f64(38.500).unwrap());
+		let elara_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(11724775187.5364).unwrap())
+			.with_eccentricity(T::from_f64(0.196015925266734).unwrap())
+			.with_inclination_deg(T::from_f64(29.645438545611).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(104.680792927026).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(254.812870711218).unwrap());
+		let elara_entry = DatabaseEntry::new(elara_info)
+			.with_parent(jupiter_handle.clone(), elara_orbit)
+			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+		self.add_entry(elara_handle, elara_entry);
+		// Pasiphae
+		let pasiphae_handle = H::from_u16(handles::HANDLE_PASIPHAE).unwrap();
+		let pasiphae_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.91e17).unwrap())
+			.with_radius_km(T::from_f64(25.700).unwrap());
+		let pasiphae_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(23398199225.7693).unwrap())
+			.with_eccentricity(T::from_f64(0.36953258321634).unwrap())
+			.with_inclination_deg(T::from_f64(141.719099777028).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(333.722656460893).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(529.781057110863).unwrap());
+		let pasiphae_entry = DatabaseEntry::new(pasiphae_info)
+			.with_parent(jupiter_handle.clone(), pasiphae_orbit)
+			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+		self.add_entry(pasiphae_handle, pasiphae_entry);
+		// return
+		self
+	}
+	/// Adds the planet Saturn to the database, with its moons
+	/// 
+	/// References wikipedia's [list of Saturn's moons](https://en.wikipedia.org/wiki/Moons_of_Saturn#List)
+	pub fn with_saturn(mut self) -> Self {
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		// saturn
+		let saturn_handle = H::from_u16(handles::HANDLE_SATURN).unwrap();
+		let saturn_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(5.6834e26).unwrap())
+			.with_radius_km(T::from_f64(69911.5).unwrap());
+		let saturn_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_au(T::from_f64(9.5826).unwrap())
+			.with_eccentricity(T::from_f64(0.0565).unwrap())
+			.with_inclination_deg(T::from_f64(2.485).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(339.392).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(113.665).unwrap());
+		let saturn_entry = DatabaseEntry::new(saturn_info)
+			.with_parent(sun_handle.clone(), saturn_orbit)
+			.with_mean_anomaly_deg(T::from_f64(317.020).unwrap());
+		self.add_entry(saturn_handle.clone(), saturn_entry);
 		// return
 		self
 	}
