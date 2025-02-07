@@ -49,6 +49,12 @@ impl<T> Body<T> where T: Float + FromPrimitive
 		self.radius_equator_km = radius;
 		self
 	}
+	pub fn with_radius_m(mut self, radius: T) -> Self {
+		let scale_factor = T::from_f64(constants::CONVERT_M_TO_KM).unwrap();
+		self.radius_polar_km = radius * scale_factor;
+		self.radius_equator_km = radius * scale_factor;
+		self
+	}
     /// Gets the mass of this body in kilograms, *kg*
     pub fn mass_kg(&self) -> T {
         self.mass_kg

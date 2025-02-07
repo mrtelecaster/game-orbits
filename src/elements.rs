@@ -23,6 +23,14 @@ impl<T> OrbitalElements<T> where T: Float + FromPrimitive {
 		self.semimajor_axis = a * T::from_f64(CONVERT_KM_TO_M).unwrap();
 		self
 	}
+	pub fn with_semimajor_axis_au(mut self, a: T) -> Self {
+		self.semimajor_axis = a * T::from_f64(CONVERT_AU_TO_M).unwrap();
+		self
+	}
+	pub fn with_semimajor_axis_m(mut self, a: T) -> Self {
+		self.semimajor_axis = a;
+		self
+	}
 	/// Sets the orbit's eccentricity
 	pub fn with_eccentricity(mut self, e: T) -> Self {
 		self.eccentricity = e;

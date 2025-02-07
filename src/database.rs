@@ -16,6 +16,11 @@ pub mod handles
 	pub const HANDLE_MARS: u16 = 5;
 	pub const HANDLE_PHOBOS: u16 = 6;
 	pub const HANDLE_DEIMOS: u16 = 7;
+	pub const HANDLE_JUPITER: u16 = 8;
+	pub const HANDLE_IO: u16 = 9;
+	pub const HANDLE_EUROPA: u16 = 10;
+	pub const HANDLE_GANYMEDE: u16 = 11;
+	pub const HANDLE_AMALTHEA: u16 = 12;
 }
 
 /// Holds the data for all the bodies being simulated
@@ -39,6 +44,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_venus()
 			.with_earth()
 			.with_mars()
+			.with_jupiter()
 	}
 	/// Adds our sun to the database
 	pub fn with_sol(mut self) -> Self {
@@ -163,6 +169,56 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(mars_handle.clone(), deimos_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(deimos_handle, deimos_entry);
+		// return
+		self
+	}
+	pub fn with_jupiter(mut self) -> Self {
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		// mars
+		let jupiter_handle = H::from_u16(handles::HANDLE_JUPITER).unwrap();
+		let jupiter_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.8982e27).unwrap())
+			.with_radius_km(T::from_f64(69911.5).unwrap());
+		let jupiter_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_au(T::from_f64(5.2038).unwrap())
+			.with_eccentricity(T::from_f64(0.0489).unwrap())
+			.with_inclination_deg(T::from_f64(1.303).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(273.867).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(100.464).unwrap());
+		let jupiter_entry = DatabaseEntry::new(jupiter_info)
+			.with_parent(sun_handle.clone(), jupiter_orbit)
+			.with_mean_anomaly_deg(T::from_f64(20.020).unwrap());
+		self.add_entry(jupiter_handle.clone(), jupiter_entry);
+		// Io
+		let io_handle = H::from_u16(handles::HANDLE_IO).unwrap();
+		let io_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(8.93e22).unwrap())
+			.with_radius_km(T::from_f64(1821.6).unwrap());
+		let io_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(422025278.692653).unwrap())
+			.with_eccentricity(T::from_f64(0.00418867166362767).unwrap())
+			.with_inclination_deg(T::from_f64(2.18312929).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(654.3518983).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(737.1542087).unwrap());
+		let io_entry = DatabaseEntry::new(io_info)
+			.with_parent(jupiter_handle.clone(), io_orbit)
+			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
+		self.add_entry(io_handle, io_entry);
+		// Europa
+		let europa_handle = H::from_u16(handles::HANDLE_EUROPA).unwrap();
+		let europa_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(4.8e22).unwrap())
+			.with_radius_m(T::from_f64(1565000.0).unwrap());
+		let europa_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(671193628.654398).unwrap())
+			.with_eccentricity(T::from_f64(0.00940288418380329).unwrap())
+			.with_inclination_deg(T::from_f64(2.216347171).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(468.8993005).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(350.5260572).unwrap());
+		let europa_entry = DatabaseEntry::new(europa_info)
+			.with_parent(jupiter_handle.clone(), europa_orbit)
+			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+		self.add_entry(europa_handle, europa_entry);
 		// return
 		self
 	}
