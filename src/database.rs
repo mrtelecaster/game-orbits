@@ -876,15 +876,48 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			return Vector3::new(zero, zero, zero);
 		}
 	}
+	/// Get a list of handles for satellites of the body with the input handle.
+	pub fn get_satellites(&self, body: &H) -> Vec<H> {
+		let mut satellites: Vec<H> = Vec::new();
+		for (handle, entry) in self.iter() {
+			if let Some(parent_handle) = &entry.parent {
+				if *parent_handle == *body {
+					satellites.push(handle.clone());
+				}
+			}
+		}
+		satellites
+	}
+	/// Get the heirarchy of parent bodies of the input body
+	pub fn get_parents(&self, body: &H) -> Vec<H> {
+		let body_entry = self.get_entry(&body);
+		if let Some(parent_handle) = &body_entry.parent {
+			let mut heirarchy = self.get_parents(parent_handle);
+			heirarchy.push(body.clone());
+			return heirarchy;
+		} else {
+			return vec![body.clone()];
+		}
+	}
+	/// Gets the combined mass of a body and all its satellites
+	pub fn get_combined_mass_kg(&self, body: &H) -> T {
+		let body_entry = self.get_entry(body);
+		let mut total_mass = body_entry.info.mass_kg();
+		for satellite_handle in self.get_satellites(body) {
+			total_mass = total_mass + self.get_combined_mass_kg(&satellite_handle);
+		}
+		return total_mass;
+	}
 	/// Calculate the radius of the sphere of influence of the body with the given handle
 	pub fn radius_soi(&self, handle: &H) -> T {
 		let orbiting_body = self.bodies.get(&handle).unwrap();
 		let orbiting_body_info = orbiting_body.info.clone();
+		let orbiting_body_mass = self.get_combined_mass_kg(handle);
 		if let Some(orbit) = &orbiting_body.orbit {
 			let parent_body = self.bodies.get(&orbiting_body.parent.clone().unwrap()).unwrap();
 			let parent_body_info = parent_body.info.clone();
 			let exponent = T::from_f64(2.0 / 5.0).unwrap();
-			return orbit.semimajor_axis * (orbiting_body_info.mass_kg() / parent_body_info.mass_kg()).powf(exponent);
+			return orbit.semimajor_axis * (orbiting_body_mass / parent_body_info.mass_kg()).powf(exponent);
 		} else {
 			let minimum_gravity = T::from_f64(0.0000005).unwrap();
 			return orbiting_body_info.distance_of_gravity(minimum_gravity);
@@ -932,5 +965,41 @@ impl<H, T> DatabaseEntry<H, T> where T: Float + FromPrimitive + SubAssign {
 			self.mean_anomaly_at_epoch -= circle;
 		}
 		self
+	}
+}
+
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use super::handles::*;
+
+	#[test]
+	fn get_satellites() {
+		let database = Database::<u16, f32>::default().with_solar_system();
+		let satellites = database.get_satellites(&HANDLE_EARTH);
+		assert_eq!(1, satellites.len());
+		assert!(satellites.contains(&HANDLE_LUNA));
+		let satellites = database.get_satellites(&HANDLE_MARS);
+		assert_eq!(2, satellites.len());
+		assert!(satellites.contains(&HANDLE_PHOBOS));
+		assert!(satellites.contains(&HANDLE_DEIMOS));
+	}
+
+	#[test]
+	fn get_parents() {
+		let database = Database::<u16, f32>::default().with_solar_system();
+		let heirarchy = database.get_parents(&HANDLE_SOL);
+		assert_eq!(1, heirarchy.len());
+		assert_eq!(HANDLE_SOL, heirarchy[0]);
+		let heirarchy = database.get_parents(&HANDLE_MARS);
+		assert_eq!(2, heirarchy.len());
+		assert_eq!(HANDLE_SOL, heirarchy[0]);
+		assert_eq!(HANDLE_MARS, heirarchy[1]);
+		let heirarchy = database.get_parents(&HANDLE_DEIMOS);
+		assert_eq!(3, heirarchy.len());
+		assert_eq!(HANDLE_SOL, heirarchy[0]);
+		assert_eq!(HANDLE_MARS, heirarchy[1]);
+		assert_eq!(HANDLE_DEIMOS, heirarchy[2]);
 	}
 }
