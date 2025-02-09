@@ -395,6 +395,156 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(sun_handle.clone(), saturn_orbit)
 			.with_mean_anomaly_deg(T::from_f64(317.020).unwrap());
 		self.add_entry(saturn_handle.clone(), saturn_entry);
+		// Mimas
+		let mimas_handle = H::from_u16(handles::HANDLE_MIMAS).unwrap();
+		let mimas_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(3.8e19).unwrap())
+			.with_radius_km(T::from_f64(196.000).unwrap());
+		let mimas_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(186037830.154953).unwrap())
+			.with_eccentricity(T::from_f64(0.0215133482144328).unwrap())
+			.with_inclination_deg(T::from_f64(29.18891093).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(167.3070822).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(449.3704298).unwrap());
+		let mimas_entry = DatabaseEntry::new(mimas_info)
+			.with_parent(saturn_handle.clone(), mimas_orbit)
+			.with_mean_anomaly_deg(T::from_f64(772.976419).unwrap());
+		self.add_entry(mimas_handle, mimas_entry);
+		// Enceladus
+		let enceladus_handle = H::from_u16(handles::HANDLE_ENCELADUS).unwrap();
+		let enceladus_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(7.3e19).unwrap())
+			.with_radius_km(T::from_f64(249.000).unwrap());
+		let enceladus_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(238408052.167797).unwrap())
+			.with_eccentricity(T::from_f64(0.000372459385461708).unwrap())
+			.with_inclination_deg(T::from_f64(28.04279097).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(169.5204865).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(264.6781976).unwrap());
+		let enceladus_entry = DatabaseEntry::new(enceladus_info)
+			.with_parent(saturn_handle.clone(), enceladus_orbit)
+			.with_mean_anomaly_deg(T::from_f64(384.1198896).unwrap());
+		self.add_entry(enceladus_handle, enceladus_entry);
+		// Tethys
+		let tethys_handle = H::from_u16(handles::HANDLE_TETHYS).unwrap();
+		let tethys_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(6.22e20).unwrap())
+			.with_radius_km(T::from_f64(530.000).unwrap());
+		let tethys_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(294982634.56239).unwrap())
+			.with_eccentricity(T::from_f64(0.00107532665445937).unwrap())
+			.with_inclination_deg(T::from_f64(26.97242049).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(169.1532561).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(496.8246271).unwrap());
+		let tethys_entry = DatabaseEntry::new(tethys_info)
+			.with_parent(saturn_handle.clone(), tethys_orbit)
+			.with_mean_anomaly_deg(T::from_f64(502.6123366).unwrap());
+		self.add_entry(tethys_handle, tethys_entry);
+		// Dione
+		let dione_handle = H::from_u16(handles::HANDLE_DIONE).unwrap();
+		let dione_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.05e21).unwrap())
+			.with_radius_km(T::from_f64(560.000).unwrap());
+		let dione_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(377653774.68302).unwrap())
+			.with_eccentricity(T::from_f64(0.00273184023667722).unwrap())
+			.with_inclination_deg(T::from_f64(28.05084794).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(169.5723087).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(5080.2590124).unwrap());
+		let dione_entry = DatabaseEntry::new(dione_info)
+			.with_parent(saturn_handle.clone(), dione_orbit)
+			.with_mean_anomaly_deg(T::from_f64(856.824114).unwrap());
+		self.add_entry(dione_handle, dione_entry);
+		// Rhea
+		let rhea_handle = H::from_u16(handles::HANDLE_RHEA).unwrap();
+		let rhea_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(2.49e21).unwrap())
+			.with_radius_km(T::from_f64(764.000).unwrap());
+		let rhea_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(527225476.502164).unwrap())
+			.with_eccentricity(T::from_f64(0.000909561682184622).unwrap())
+			.with_inclination_deg(T::from_f64(27.94971857).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(168.8079837).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(360.9692475).unwrap());
+		let rhea_entry = DatabaseEntry::new(rhea_info)
+			.with_parent(saturn_handle.clone(), rhea_orbit)
+			.with_mean_anomaly_deg(T::from_f64(448.7342263).unwrap());
+		self.add_entry(rhea_handle, rhea_entry);
+		// Titan
+		let titan_handle = H::from_u16(handles::HANDLE_TITAN).unwrap();
+		let titan_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.35e23).unwrap())
+			.with_radius_km(T::from_f64(2575.000).unwrap());
+		let titan_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(1221971852.3956).unwrap())
+			.with_eccentricity(T::from_f64(0.0286455635677465).unwrap())
+			.with_inclination_deg(T::from_f64(27.71621075).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(169.1427802).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(336.2491384).unwrap());
+		let titan_entry = DatabaseEntry::new(titan_info)
+			.with_parent(saturn_handle.clone(), titan_orbit)
+			.with_mean_anomaly_deg(T::from_f64(143.0542442).unwrap());
+		self.add_entry(titan_handle, titan_entry);
+		// Hyperion
+		let hyperion_handle = H::from_u16(handles::HANDLE_HYPERION).unwrap();
+		let hyperion_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.77e19).unwrap())
+			.with_radius_km(T::from_f64(143.000).unwrap());
+		let hyperion_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(1447200000.0).unwrap())
+			.with_eccentricity(T::from_f64(0.0757).unwrap())
+			.with_inclination_deg(T::from_f64(27.0344979012323).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(168.9).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(182.895).unwrap());
+		let hyperion_entry = DatabaseEntry::new(hyperion_info)
+			.with_parent(saturn_handle.clone(), hyperion_orbit)
+			.with_mean_anomaly_deg(T::from_f64(301.6).unwrap());
+		self.add_entry(hyperion_handle, hyperion_entry);
+		// Iapetus
+		let iapetus_handle = H::from_u16(handles::HANDLE_IAPETUS).unwrap();
+		let iapetus_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.6e22).unwrap())
+			.with_radius_km(T::from_f64(730.000).unwrap());
+		let iapetus_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(3563513670.80278).unwrap())
+			.with_eccentricity(T::from_f64(0.0274067153032204).unwrap())
+			.with_inclination_deg(T::from_f64(17.25375588).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(139.3182554).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(369.2974058).unwrap());
+		let iapetus_entry = DatabaseEntry::new(iapetus_info)
+			.with_parent(saturn_handle.clone(), iapetus_orbit)
+			.with_mean_anomaly_deg(T::from_f64(551.098555).unwrap());
+		self.add_entry(iapetus_handle, iapetus_entry);
+		// Phoebe
+		let phoebe_handle = H::from_u16(handles::HANDLE_PHOEBE).unwrap();
+		let phoebe_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(7.8e15).unwrap())
+			.with_radius_km(T::from_f64(3.000).unwrap());
+		let phoebe_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(12995759988.095).unwrap())
+			.with_eccentricity(T::from_f64(0.0000156144511577606).unwrap())
+			.with_inclination_deg(T::from_f64(0.0151781240198135).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
+		let phoebe_entry = DatabaseEntry::new(phoebe_info)
+			.with_parent(saturn_handle.clone(), phoebe_orbit)
+			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
+		self.add_entry(phoebe_handle, phoebe_entry);
+		// Janus
+		let janus_handle = H::from_u16(handles::HANDLE_JANUS).unwrap();
+		let janus_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(7.0e15).unwrap())
+			.with_radius_km(T::from_f64(3.000).unwrap());
+		let janus_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(151460988.095).unwrap())
+			.with_eccentricity(T::from_f64(0.0000000144511577606).unwrap())
+			.with_inclination_deg(T::from_f64(0.000007105811891727).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
+		let janus_entry = DatabaseEntry::new(janus_info)
+			.with_parent(saturn_handle.clone(), janus_orbit)
+			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
+		self.add_entry(janus_handle, janus_entry);
 		// return
 		self
 	}

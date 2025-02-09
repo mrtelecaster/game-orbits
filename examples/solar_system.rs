@@ -16,7 +16,7 @@ const CAM_ROTATE_SPEED: f32 = 0.8; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.12;
 const CAM_MAX_DISTANCE: f32 = 10000.0;
 const CAM_ZOOM_SPEED: f32 = 0.08;
-const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_MIRANDA as usize;
+const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_JANUS as usize;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
