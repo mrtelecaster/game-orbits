@@ -1,4 +1,4 @@
-use std::{collections::{hash_map::Iter, HashMap}, hash::Hash, ops::Mul};
+use std::{collections::{hash_map::Iter, HashMap}, hash::Hash, ops::SubAssign};
 use nalgebra::{RealField, Rotation3, SimdRealField, SimdValue, Vector3};
 use num_traits::{Float, FromPrimitive};
 use crate::{constants::f64::CONVERT_DEG_TO_RAD, Body, OrbitalElements};
@@ -57,10 +57,27 @@ pub mod handles
 	pub const HANDLE_GEIRROD: u16 = HANDLE_SATURN + 66;
 	pub const HANDLE_URANUS: u16 = HANDLE_SATURN + 148;
 	pub const HANDLE_ARIEL: u16 = HANDLE_URANUS + 1;
+	pub const HANDLE_UMBRIEL: u16 = HANDLE_URANUS + 2;
+	pub const HANDLE_TITANIA: u16 = HANDLE_URANUS + 3;
+	pub const HANDLE_OBERON: u16 = HANDLE_URANUS + 4;
+	pub const HANDLE_MIRANDA: u16 = HANDLE_URANUS + 5;
 	pub const HANDLE_CUPID: u16 = HANDLE_URANUS + 27;
 	pub const HANDLE_NEPTUNE: u16 = HANDLE_URANUS + 28;
 	pub const HANDLE_TRITON: u16 = HANDLE_NEPTUNE + 1;
+	pub const HANDLE_NEREID: u16 = HANDLE_NEPTUNE + 2;
+	pub const HANDLE_NAIAD: u16 = HANDLE_NEPTUNE + 3;
+	pub const HANDLE_THALASSA: u16 = HANDLE_NEPTUNE + 4;
+	pub const HANDLE_DESPINA: u16 = HANDLE_NEPTUNE + 5;
+	pub const HANDLE_GALATEA: u16 = HANDLE_NEPTUNE + 6;
+	pub const HANDLE_LARISSA: u16 = HANDLE_NEPTUNE + 7;
+	pub const HANDLE_PROTEUS: u16 = HANDLE_NEPTUNE + 8;
+	pub const HANDLE_HALIMEDE: u16 = HANDLE_NEPTUNE + 9;
+	pub const HANDLE_PSAMATHE: u16 = HANDLE_NEPTUNE + 10;
+	pub const HANDLE_SAO: u16 = HANDLE_NEPTUNE + 11;
+	pub const HANDLE_LAOMEDEIA: u16 = HANDLE_NEPTUNE + 12;
+	pub const HANDLE_NESO: u16 = HANDLE_NEPTUNE + 13;
 	pub const HANDLE_HIPPOCAMP: u16 = HANDLE_NEPTUNE + 14;
+	pub const HANDLE_PLUTO: u16 = HANDLE_NEPTUNE + 17;
 }
 
 /// Holds the data for all the bodies being simulated
@@ -76,7 +93,7 @@ pub mod handles
 pub struct Database<H, T> {
 	bodies: HashMap<H, DatabaseEntry<H, T>>,
 }
-impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone + Float + FromPrimitive {
+impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone + Float + FromPrimitive + SubAssign {
 	/// populates the database with celestial bodies from our solar system
 	pub fn with_solar_system(self) -> Self {
 		self.with_sol()
@@ -386,7 +403,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	/// References [Wikipedia's list of Uranian moons](https://en.wikipedia.org/wiki/Moons_of_Uranus#List)
 	pub fn with_uranus(mut self) -> Self {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
-		// saturn
+		// Uranus
 		let uranus_handle = H::from_u16(handles::HANDLE_URANUS).unwrap();
 		let uranus_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(8.6810e25).unwrap())
@@ -401,6 +418,81 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(sun_handle.clone(), uranus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(142.238600).unwrap());
 		self.add_entry(uranus_handle.clone(), uranus_entry);
+		// Ariel
+		let ariel_handle = H::from_u16(handles::HANDLE_ARIEL).unwrap();
+		let ariel_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.27e21).unwrap())
+			.with_radius_km(T::from_f64(578.9).unwrap());
+		let ariel_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(190940711.743871).unwrap())
+			.with_eccentricity(T::from_f64(0.00137850353892181).unwrap())
+			.with_inclination_deg(T::from_f64(97.79230874).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(167.6951854).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(236.6892802).unwrap());
+		let ariel_entry = DatabaseEntry::new(ariel_info)
+			.with_parent(uranus_handle.clone(), ariel_orbit)
+			.with_mean_anomaly_deg(T::from_f64(583.1923962).unwrap());
+		self.add_entry(ariel_handle, ariel_entry);
+		// Umbriel
+		let umbriel_handle = H::from_u16(handles::HANDLE_UMBRIEL).unwrap();
+		let umbriel_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.27e21).unwrap())
+			.with_radius_km(T::from_f64(584.7).unwrap());
+		let umbriel_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(266004056.284577).unwrap())
+			.with_eccentricity(T::from_f64(0.00436450298644918).unwrap())
+			.with_inclination_deg(T::from_f64(97.682239322).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(167.7113413).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(521.5502336).unwrap());
+		let umbriel_entry = DatabaseEntry::new(umbriel_info)
+			.with_parent(uranus_handle.clone(), umbriel_orbit)
+			.with_mean_anomaly_deg(T::from_f64(837.2597847).unwrap());
+		self.add_entry(umbriel_handle, umbriel_entry);
+		// Titania
+		let titania_handle = H::from_u16(handles::HANDLE_TITANIA).unwrap();
+		let titania_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(3.49e21).unwrap())
+			.with_radius_km(T::from_f64(788.9).unwrap());
+		let titania_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(436347342.837041).unwrap())
+			.with_eccentricity(T::from_f64(0.00275764018002836).unwrap())
+			.with_inclination_deg(T::from_f64(97.78930872).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(167.6116584).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(399.5640193).unwrap());
+		let titania_entry = DatabaseEntry::new(titania_info)
+			.with_parent(uranus_handle.clone(), titania_orbit)
+			.with_mean_anomaly_deg(T::from_f64(496.5752932).unwrap());
+		self.add_entry(titania_handle, titania_entry);
+		// Oberon
+		let oberon_handle = H::from_u16(handles::HANDLE_OBERON).unwrap();
+		let oberon_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(3.03e21).unwrap())
+			.with_radius_km(T::from_f64(761.4).unwrap());
+		let oberon_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(583560909.561177).unwrap())
+			.with_eccentricity(T::from_f64(0.00110658045344143).unwrap())
+			.with_inclination_deg(T::from_f64(97.87882122).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(167.7422432).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(288.925047).unwrap());
+		let oberon_entry = DatabaseEntry::new(oberon_info)
+			.with_parent(uranus_handle.clone(), oberon_orbit)
+			.with_mean_anomaly_deg(T::from_f64(472.6703921).unwrap());
+		self.add_entry(oberon_handle, oberon_entry);
+		// Miranda
+		let miranda_handle = H::from_u16(handles::HANDLE_MIRANDA).unwrap();
+		let miranda_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(6.33e19).unwrap())
+			.with_radius_km(T::from_f64(235.800).unwrap());
+		let miranda_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(129.87e6).unwrap())
+			.with_eccentricity(T::from_f64(0.0014).unwrap())
+			.with_inclination_deg(T::from_f64(96.44799101).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(163.4949965).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(242.2809905).unwrap());
+		let miranda_entry = DatabaseEntry::new(miranda_info)
+			.with_parent(uranus_handle.clone(), miranda_orbit)
+			.with_mean_anomaly_deg(T::from_f64(143.0330121).unwrap());
+		self.add_entry(miranda_handle, miranda_entry);
 		// return
 		self
 	}
@@ -424,6 +516,111 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(sun_handle.clone(), neptune_orbit)
 			.with_mean_anomaly_deg(T::from_f64(317.020).unwrap());
 		self.add_entry(neptune_handle.clone(), neptune_entry);
+		// Triton
+		let triton_handle = H::from_u16(handles::HANDLE_TRITON).unwrap();
+		let triton_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(2.14e22).unwrap())
+			.with_radius_km(T::from_f64(1352.500).unwrap());
+		let triton_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(354765668.747018).unwrap())
+			.with_eccentricity(T::from_f64(0.0000177503155008841).unwrap())
+			.with_inclination_deg(T::from_f64(129.9699061).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(217.2530657).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(521.6797862 - 360.0).unwrap());
+		let triton_entry = DatabaseEntry::new(triton_info)
+			.with_parent(neptune_handle.clone(), triton_orbit)
+			.with_mean_anomaly_deg(T::from_f64(829.2581612).unwrap());
+		self.add_entry(triton_handle, triton_entry);
+		// Nereid
+		let nereid_handle = H::from_u16(handles::HANDLE_NEREID).unwrap();
+		let nereid_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.317e19).unwrap())
+			.with_radius_km(T::from_f64(165.0).unwrap());
+		let nereid_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(5515375933.0092).unwrap())
+			.with_eccentricity(T::from_f64(0.747077257017379).unwrap())
+			.with_inclination_deg(T::from_f64(5.0672309310494).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(320.104934616101).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(616.561942032962 - 360.0).unwrap());
+		let nereid_entry = DatabaseEntry::new(nereid_info)
+			.with_parent(neptune_handle.clone(), nereid_orbit)
+			.with_mean_anomaly_deg(T::from_f64(684.0532414137 - 360.0).unwrap());
+		self.add_entry(nereid_handle, nereid_entry);
+		// Naiad
+		let naiad_handle = H::from_u16(handles::HANDLE_NAIAD).unwrap();
+		let naiad_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(5.8e15).unwrap())
+			.with_radius_km(T::from_f64(2.0).unwrap());
+		let naiad_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(48227784.2).unwrap())
+			.with_eccentricity(T::from_f64(0.000000447511577606).unwrap())
+			.with_inclination_deg(T::from_f64(0.0272397898144598).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
+		let naiad_entry = DatabaseEntry::new(naiad_info)
+			.with_parent(neptune_handle.clone(), naiad_orbit)
+			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
+		self.add_entry(naiad_handle, naiad_entry);
+		// Thalassa
+		let thalassa_handle = H::from_u16(handles::HANDLE_THALASSA).unwrap();
+		let thalassa_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(5.8e15).unwrap())
+			.with_radius_km(T::from_f64(2.0).unwrap());
+		let thalassa_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(50141475.7560609).unwrap())
+			.with_eccentricity(T::from_f64(0.001370609133743).unwrap())
+			.with_inclination_deg(T::from_f64(28.635825609126).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(49.1486489463042).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(178.660268240832).unwrap());
+		let thalassa_entry = DatabaseEntry::new(thalassa_info)
+			.with_parent(neptune_handle.clone(), thalassa_orbit)
+			.with_mean_anomaly_deg(T::from_f64(187.573079498586).unwrap());
+		self.add_entry(thalassa_handle, thalassa_entry);
+		// Despina
+		let despina_handle = H::from_u16(handles::HANDLE_DESPINA).unwrap();
+		let despina_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(2.21e16).unwrap())
+			.with_radius_km(T::from_f64(12.0).unwrap());
+		let despina_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(60227784.2).unwrap())
+			.with_eccentricity(T::from_f64(0.0000000244511577606).unwrap())
+			.with_inclination_deg(T::from_f64(0.001238965071423).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
+		let despina_entry = DatabaseEntry::new(despina_info)
+			.with_parent(neptune_handle.clone(), despina_orbit)
+			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
+		self.add_entry(despina_handle, despina_entry);
+		// Galatea
+		let galatea_handle = H::from_u16(handles::HANDLE_GALATEA).unwrap();
+		let galatea_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(5.955e16).unwrap())
+			.with_radius_km(T::from_f64(79.1).unwrap());
+		let galatea_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(62097694.895992).unwrap())
+			.with_eccentricity(T::from_f64(0.00176342814065272).unwrap())
+			.with_inclination_deg(T::from_f64(28.5712798372164).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(48.6938364381423).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(188.29717200708).unwrap());
+		let galatea_entry = DatabaseEntry::new(galatea_info)
+			.with_parent(neptune_handle.clone(), galatea_orbit)
+			.with_mean_anomaly_deg(T::from_f64(216.667607835566).unwrap());
+		self.add_entry(galatea_handle, galatea_entry);
+		// Larissa
+		let larissa_handle = H::from_u16(handles::HANDLE_LARISSA).unwrap();
+		let larissa_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(8.563e16).unwrap())
+			.with_radius_km(T::from_f64(99.96).unwrap());
+		let larissa_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(73591064.2683372).unwrap())
+			.with_eccentricity(T::from_f64(0.001696576604903).unwrap())
+			.with_inclination_deg(T::from_f64(28.3531487332235).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(48.9078558843833).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(378.844329275267).unwrap());
+		let larissa_entry = DatabaseEntry::new(larissa_info)
+			.with_parent(neptune_handle.clone(), larissa_orbit)
+			.with_mean_anomaly_deg(T::from_f64(428.613425343462).unwrap());
+		self.add_entry(larissa_handle, larissa_entry);
 		// return
 		self
 	}
@@ -501,7 +698,7 @@ pub struct DatabaseEntry<H, T> {
 	pub mean_anomaly_at_epoch: T,
 	pub scale: T,
 }
-impl<H, T> DatabaseEntry<H, T> where T: FromPrimitive + Mul<T, Output=T> {
+impl<H, T> DatabaseEntry<H, T> where T: Float + FromPrimitive + SubAssign {
 	pub fn new(info: Body<T>) -> Self {
 		Self{
 			info,
@@ -520,6 +717,10 @@ impl<H, T> DatabaseEntry<H, T> where T: FromPrimitive + Mul<T, Output=T> {
 	}
 	pub fn with_mean_anomaly_deg(mut self, mean_anomaly: T) -> Self {
 		self.mean_anomaly_at_epoch = mean_anomaly * T::from_f64(CONVERT_DEG_TO_RAD).unwrap();
+		let circle = T::from_f64(360.0).unwrap();
+		while self.mean_anomaly_at_epoch > circle {
+			self.mean_anomaly_at_epoch -= circle;
+		}
 		self
 	}
 }
