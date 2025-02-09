@@ -26,7 +26,7 @@ pub mod handles
 	pub const HANDLE_ELARA: u16 = HANDLE_JUPITER + 7;
 	pub const HANDLE_PASIPHAE: u16 = HANDLE_JUPITER + 8;
 	pub const HANDLE_SINOPE: u16 = HANDLE_JUPITER + 9;
-	pub const HANDLE_LYSITHAE: u16 = HANDLE_JUPITER + 10;
+	pub const HANDLE_LYSITHEA: u16 = HANDLE_JUPITER + 10;
 	pub const HANDLE_CARME: u16 = HANDLE_JUPITER + 11;
 	pub const HANDLE_ANANKE: u16 = HANDLE_JUPITER + 12;
 	pub const HANDLE_LEDA: u16 = HANDLE_JUPITER + 13;
@@ -372,6 +372,66 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(jupiter_handle.clone(), pasiphae_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(pasiphae_handle, pasiphae_entry);
+		// Sinope
+		let sinope_handle = H::from_u16(handles::HANDLE_SINOPE).unwrap();
+		let sinope_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(7.77e16).unwrap())
+			.with_radius_km(T::from_f64(18.1).unwrap());
+		let sinope_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(23731586385.2044).unwrap())
+			.with_eccentricity(T::from_f64(0.286212248401311).unwrap())
+			.with_inclination_deg(T::from_f64(153.516632270518).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(326.138400070621).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(330.01471478535).unwrap());
+		let sinope_entry = DatabaseEntry::new(sinope_info)
+			.with_parent(jupiter_handle.clone(), sinope_orbit)
+			.with_mean_anomaly_deg(T::from_f64(578.187135014671).unwrap());
+		self.add_entry(sinope_handle, sinope_entry);
+		// Lysithea
+		let lysithea_handle = H::from_u16(handles::HANDLE_LYSITHEA).unwrap();
+		let lysithea_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(7.77e16).unwrap())
+			.with_radius_km(T::from_f64(18.2).unwrap());
+		let lysithea_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(11681680564.3821).unwrap())
+			.with_eccentricity(T::from_f64(0.133982901517185).unwrap())
+			.with_inclination_deg(T::from_f64(27.1161743142435).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(1.25211821789787).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(64.8726214272199).unwrap());
+		let lysithea_entry = DatabaseEntry::new(lysithea_info)
+			.with_parent(jupiter_handle.clone(), lysithea_orbit)
+			.with_mean_anomaly_deg(T::from_f64(158.993906489824).unwrap());
+		self.add_entry(lysithea_handle, lysithea_entry);
+		// Carme
+		let carme_handle = H::from_u16(handles::HANDLE_CARME).unwrap();
+		let carme_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(9.56e16).unwrap())
+			.with_radius_km(T::from_f64(39.2).unwrap());
+		let carme_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(22846253568.9564).unwrap())
+			.with_eccentricity(T::from_f64(0.222748653886903).unwrap())
+			.with_inclination_deg(T::from_f64(164.964353121975).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(143.056427256701).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(199.239805499578).unwrap());
+		let carme_entry = DatabaseEntry::new(carme_info)
+			.with_parent(jupiter_handle.clone(), carme_orbit)
+			.with_mean_anomaly_deg(T::from_f64(545.059221473009).unwrap());
+		self.add_entry(carme_handle, carme_entry);
+		// Ananke
+		let ananke_handle = H::from_u16(handles::HANDLE_ANANKE).unwrap();
+		let ananke_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(3.82e16).unwrap())
+			.with_radius_km(T::from_f64(14.9).unwrap());
+		let ananke_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_m(T::from_f64(21178519961.0608).unwrap())
+			.with_eccentricity(T::from_f64(0.360749649973783).unwrap())
+			.with_inclination_deg(T::from_f64(151.631855563574).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(39.1941066220987).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(131.881909593109).unwrap());
+		let ananke_entry = DatabaseEntry::new(ananke_info)
+			.with_parent(jupiter_handle.clone(), ananke_orbit)
+			.with_mean_anomaly_deg(T::from_f64(365.178243021899).unwrap());
+		self.add_entry(ananke_handle, ananke_entry);
 		// return
 		self
 	}
