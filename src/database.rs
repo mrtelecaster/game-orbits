@@ -876,6 +876,18 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			return Vector3::new(zero, zero, zero);
 		}
 	}
+	/// Get a list of handles for satellites of the body with the input handle.
+	pub fn get_satellites(&self, body: H) -> Vec<H> {
+		let mut satellites: Vec<H> = Vec::new();
+		for (handle, entry) in self.iter() {
+			if let Some(parent_handle) = &entry.parent {
+				if *parent_handle == body {
+					satellites.push(handle.clone());
+				}
+			}
+		}
+		satellites
+	}
 	/// Calculate the radius of the sphere of influence of the body with the given handle
 	pub fn radius_soi(&self, handle: &H) -> T {
 		let orbiting_body = self.bodies.get(&handle).unwrap();
@@ -932,5 +944,24 @@ impl<H, T> DatabaseEntry<H, T> where T: Float + FromPrimitive + SubAssign {
 			self.mean_anomaly_at_epoch -= circle;
 		}
 		self
+	}
+}
+
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use super::handles::*;
+
+	#[test]
+	fn get_satellites() {
+		let database = Database::<u16, f32>::default().with_solar_system();
+		let satellites = database.get_satellites(HANDLE_EARTH);
+		assert_eq!(1, satellites.len());
+		assert!(satellites.contains(&HANDLE_LUNA));
+		let satellites = database.get_satellites(HANDLE_MARS);
+		assert_eq!(2, satellites.len());
+		assert!(satellites.contains(&HANDLE_PHOBOS));
+		assert!(satellites.contains(&HANDLE_DEIMOS));
 	}
 }
