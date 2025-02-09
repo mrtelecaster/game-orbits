@@ -888,6 +888,17 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		}
 		satellites
 	}
+	/// Get the heirarchy of parent bodies of the input body
+	pub fn get_parents(&self, body: H) -> Vec<H> {
+		let body_entry = self.get_entry(&body);
+		if let Some(parent_handle) = &body_entry.parent {
+			let mut heirarchy = self.get_parents(parent_handle.clone());
+			heirarchy.push(body);
+			return heirarchy;
+		} else {
+			return vec![body];
+		}
+	}
 	/// Calculate the radius of the sphere of influence of the body with the given handle
 	pub fn radius_soi(&self, handle: &H) -> T {
 		let orbiting_body = self.bodies.get(&handle).unwrap();
@@ -963,5 +974,22 @@ mod tests {
 		assert_eq!(2, satellites.len());
 		assert!(satellites.contains(&HANDLE_PHOBOS));
 		assert!(satellites.contains(&HANDLE_DEIMOS));
+	}
+
+	#[test]
+	fn get_parents() {
+		let database = Database::<u16, f32>::default().with_solar_system();
+		let heirarchy = database.get_parents(HANDLE_SOL);
+		assert_eq!(1, heirarchy.len());
+		assert_eq!(HANDLE_SOL, heirarchy[0]);
+		let heirarchy = database.get_parents(HANDLE_MARS);
+		assert_eq!(2, heirarchy.len());
+		assert_eq!(HANDLE_SOL, heirarchy[0]);
+		assert_eq!(HANDLE_MARS, heirarchy[1]);
+		let heirarchy = database.get_parents(HANDLE_DEIMOS);
+		assert_eq!(3, heirarchy.len());
+		assert_eq!(HANDLE_SOL, heirarchy[0]);
+		assert_eq!(HANDLE_MARS, heirarchy[1]);
+		assert_eq!(HANDLE_DEIMOS, heirarchy[2]);
 	}
 }
