@@ -1,4 +1,8 @@
-use std::{collections::{hash_map::Iter, HashMap}, hash::Hash, ops::SubAssign};
+use std::{
+	collections::{hash_map::Iter, HashMap},
+	fmt::{Debug, Display},
+	hash::Hash, ops::SubAssign
+};
 use nalgebra::{RealField, Rotation3, SimdRealField, SimdValue, Vector3};
 use num_traits::{Float, FromPrimitive};
 use crate::{constants::f64::CONVERT_DEG_TO_RAD, Body, OrbitalElements};
@@ -152,6 +156,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		self.add_entry(venus_handle, venus_entry);
 		self
 	}
+	/// Adds the Earth and its moon to the database
 	pub fn with_earth(mut self) -> Self {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let earth_handle = H::from_u16(handles::HANDLE_EARTH).unwrap();
@@ -182,6 +187,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		self.add_entry(moon_handle, moon_entry);
 		self
 	}
+	/// Adds the planet Mars and its two moons to the database
 	pub fn with_mars(mut self) -> Self {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		// mars
@@ -232,7 +238,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		// return
 		self
 	}
-	/// Adds the planet jupiter to the database, with its moons
+	/// Adds the planet jupiter to the database with a selection of its moons
 	/// 
 	/// Referencing wikipedia's [list of Jupiter's moons](https://en.wikipedia.org/wiki/Moons_of_Jupiter#List)
 	pub fn with_jupiter(mut self) -> Self {
@@ -435,7 +441,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		// return
 		self
 	}
-	/// Adds the planet Saturn to the database, with its moons
+	/// Adds the planet Saturn to the database with a selection of its moons
 	/// 
 	/// References wikipedia's [list of Saturn's moons](https://en.wikipedia.org/wiki/Moons_of_Saturn#List)
 	pub fn with_saturn(mut self) -> Self {
@@ -608,7 +614,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		// return
 		self
 	}
-	/// Adds Uranus and its moons to the system
+	/// Adds Uranus and a selection of its moons to the database
 	/// 
 	/// References [Wikipedia's list of Uranian moons](https://en.wikipedia.org/wiki/Moons_of_Uranus#List)
 	pub fn with_uranus(mut self) -> Self {
@@ -706,7 +712,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		// return
 		self
 	}
-	/// Adds Neptune and its moons to the system
+	/// Adds Neptune and a selection of its moons to the database
 	/// 
 	/// References [Wikipedia's list of Neptunian moons](https://en.wikipedia.org/wiki/Moons_of_Neptune#List)
 	pub fn with_neptune(mut self) -> Self {
@@ -862,6 +868,41 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		} else {
 			return Vector3::new(zero, zero, zero);
 		}
+	}
+	pub fn relative_position(&self, origin: &H, relative: &H) -> Option<Vector3<T>> where H: Debug + Display + Ord, T: RealField + SimdValue + SimdRealField {
+		// println!("Finding relative position between origin body {} and relative body {}", origin, relative);
+		let relative_heirarchy: Vec<H> = self.get_parents(relative);
+		// println!("Relative heirarchy: {:?}", relative_heirarchy);
+		let zero = T::from_f32(0.0).unwrap();
+		let mut relative_position = Vector3::new(zero, zero, zero);
+		let mut entry = self.get_entry(origin);
+		// println!("\tSubtracting orbital position of {}", origin);
+		relative_position -= self.position_at_mean_anomaly(origin, entry.mean_anomaly_at_epoch);
+		while let Some(parent_handle) = &entry.parent {
+			entry = self.get_entry(parent_handle);
+			// println!("\tSubtracting orbital position of {}", parent_handle);
+			relative_position -= self.position_at_mean_anomaly(parent_handle, entry.mean_anomaly_at_epoch);
+			// if the heirarchy of the relative body contains this body, start summing the orbits in that heirarchy
+			if let Ok(parent_relative_index) = relative_heirarchy.binary_search(&parent_handle) {
+				// println!("Reached heirarchy intersection at body {}", parent_handle);
+				let mut index = parent_relative_index;
+				let mut handle;
+				while index < relative_heirarchy.len() {
+					handle = &relative_heirarchy[index];
+					entry = self.get_entry(handle);
+					// println!("\tAdding orbital position of {}", handle);
+					relative_position += self.position_at_mean_anomaly(handle, entry.mean_anomaly_at_epoch);
+					// println!("Checking if body at index {} ({}) is the relative body {}", index, handle, relative);
+					if handle == relative {
+						return Some(relative_position);
+					}
+					// println!("Body at index {} ({}) is not the relative body {}. Incrementing index and trying again", index, handle, relative);
+					index += 1;
+					
+				}
+			}
+		}
+		return None;
 	}
 	pub fn absolute_position_at_time(&self, handle: &H, time: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
 		let zero = T::from_f32(0.0).unwrap();
