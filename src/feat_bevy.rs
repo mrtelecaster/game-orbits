@@ -1,4 +1,4 @@
-use std::{collections::hash_map::Iter, hash::Hash};
+use std::{collections::hash_map::Iter, fmt::{Debug, Display}, hash::Hash};
 use bevy::prelude::*;
 use nalgebra::Vector3;
 use num_traits::FromPrimitive;
@@ -9,7 +9,7 @@ use crate::{Database, DatabaseEntry};
 pub struct BevyPlanetDatabase<H> {
     database: Database<H, f32>
 }
-impl<H> BevyPlanetDatabase<H> where H: Clone + Eq + Hash + FromPrimitive {
+impl<H> BevyPlanetDatabase<H> where H: Clone + Debug + Display + Eq + Hash + FromPrimitive + Ord {
     pub fn get_entry(&self, handle: &H) -> &DatabaseEntry<H, f32> {
         self.database.get_entry(handle)
     }
@@ -19,6 +19,12 @@ impl<H> BevyPlanetDatabase<H> where H: Clone + Eq + Hash + FromPrimitive {
     pub fn absolute_position_at_time(&self, handle: &H, time: f32) -> Vec3 {
         vec_nalgebra_to_bevy(self.database.absolute_position_at_time(handle, time))
     }
+	pub fn relative_position(&self, origin: &H, relative: &H) -> Option<Vec3> {
+		match self.database.relative_position(origin, relative) {
+			Some(vector) => Some(vec_nalgebra_to_bevy(vector)),
+			None => None,
+		}
+	}
     pub fn radius_soi(&self, handle: &H) -> f32 {
         self.database.radius_soi(handle)
     }

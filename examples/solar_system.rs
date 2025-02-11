@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use game_orbits::{BevyPlanetDatabase, handles::*};
 
 
-const SCALE: f32 = 1.0 / 200_000_000.0;
+const SCALE: f32 = 1.0 / 50_000_000.0;
 
 const CAM_ROTATE_UP: KeyCode = KeyCode::ArrowUp;
 const CAM_ROTATE_DOWN: KeyCode = KeyCode::ArrowDown;
@@ -13,10 +13,10 @@ const CAM_ZOOM_IN: KeyCode = KeyCode::Equal;
 const CAM_ZOOM_OUT: KeyCode = KeyCode::Minus;
 const CAM_MAX_PITCH: f32 = 1.55; // rad
 const CAM_ROTATE_SPEED: f32 = 0.8; // rad/s
-const CAM_MIN_DISTANCE: f32 = 0.2;
+const CAM_MIN_DISTANCE: f32 = 0.3;
 const CAM_MAX_DISTANCE: f32 = 50000.0;
 const CAM_ZOOM_SPEED: f32 = 0.08;
-const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_EARTH as usize;
+const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_LARISSA as usize;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
@@ -97,13 +97,12 @@ fn process_input(
 fn update_camera_position(
 	mut camera_parents: Query<(&mut Transform, &CameraParent), Without<Camera3d>>,
 	mut cameras: Query<&mut Transform, (With<Camera3d>, Without<CameraParent>)>,
-	database: Res<Database>,
 ){
 	let (mut camera_parent_transform, camera_parent) = camera_parents.single_mut();
 	let mut camera_transform = cameras.single_mut();
 	let camera_rotation = Quat::from_axis_angle(Vec3::X, camera_parent.pitch);
 	let camera_direction = camera_rotation * -Vec3::Z;
-	let center_position = database.absolute_position_at_time(&camera_parent.centered_body, 0.0) * SCALE;
+	let center_position = Vec3::ZERO;
 	// info!("Setting camera center position to {:?}", center_position);
 	let camera_distance = CAM_MIN_DISTANCE.lerp(CAM_MAX_DISTANCE, camera_parent.zoom.powf(3.0));
 	camera_parent_transform.translation = center_position;
@@ -116,10 +115,12 @@ fn draw_orbits(
 	mut gizmos: Gizmos, db: Res<Database>, camera_parents: Query<&CameraParent>,
 ) {
 	let camera_parent = camera_parents.single();
+	let origin_body = camera_parent.centered_body;
 	let step = TAU / (ORBIT_SEGMENTS-1) as f32;
 	for (handle, entry) in db.iter() {
 		if let Some(parent_handle) = entry.parent {
-			let parent_pos = db.absolute_position_at_time(&parent_handle, entry.mean_anomaly_at_epoch) * SCALE;
+			let failure_msg = format!("Failed to find relative position between origin body {} and relative body {}", origin_body, parent_handle);
+			let parent_pos = db.relative_position(&origin_body, &parent_handle).expect(&failure_msg) * SCALE;
 			// draw orbit path
 			for i in 0..ORBIT_SEGMENTS-1 {
 				let t_0 = step * i as f32;
@@ -138,9 +139,11 @@ fn draw_orbits(
 	}
 }
 
-fn draw_planets(mut gizmos: Gizmos, db: Res<Database>) {
+fn draw_planets(mut gizmos: Gizmos, db: Res<Database>, camera_parents: Query<&CameraParent>) {
+	let camera_parent = camera_parents.single();
+	let centered_body = camera_parent.centered_body;
 	for (handle, entry) in db.iter() {
-		let pos = db.absolute_position_at_time(handle, 0.0) * SCALE;
+		let pos = db.relative_position(&centered_body, handle).unwrap() * SCALE;
 		let soi_radius = db.radius_soi(handle);
 		let info = entry.info.clone();
 		// info!("Scale radius: {} units", info.radius_avg_km() * scale);
@@ -149,17 +152,13 @@ fn draw_planets(mut gizmos: Gizmos, db: Res<Database>) {
 	}
 }
 
-fn draw_axis(mut gizmos: Gizmos) {
-	gizmos.axes(Transform::from_translation(Vec3::ZERO), 5.0);
-}
-
 fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
 		.insert_resource(Database::default().with_solar_system())
 		.add_systems(Startup, setup_camera)
 		.add_systems(Update, (
-			draw_orbits, draw_planets, draw_axis,
+			draw_orbits, draw_planets,
 			process_input, update_camera_position.after(process_input),
 		))
 		.run();
