@@ -13,6 +13,12 @@ impl<H> BevyPlanetDatabase<H> where H: Clone + Debug + Display + Eq + Hash + Fro
     pub fn get_entry(&self, handle: &H) -> &DatabaseEntry<H, f32> {
         self.database.get_entry(handle)
     }
+    pub fn get_satellites(&self, handle: &H) -> Vec<H> {
+        self.database.get_satellites(handle)
+    }
+	pub fn get_parents(&self, handle: &H) -> Vec<H> {
+		self.database.get_parents(handle)
+	}
     pub fn position_at_mean_anomaly(&self, handle: &H, mean_anomaly: f32) -> Vec3 {
         vec_nalgebra_to_bevy(self.database.position_at_mean_anomaly(handle, mean_anomaly))
     }
