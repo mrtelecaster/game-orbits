@@ -33,6 +33,11 @@ const APSIS_SIZE_MAX: f32 = 2000.0;
 
 type Database = BevyPlanetDatabase<usize>;
 
+#[derive(Resource)]
+struct UiElements {
+	focused_planet_name: Entity,
+}
+
 #[derive(Component)]
 struct CameraParent {
 	pub centered_body: usize,
@@ -66,6 +71,36 @@ fn setup_camera(mut commands: Commands) {
 		Visibility::default(),
 		CameraParent::default().centered_on(CAM_CENTERED_ON_DEFAULT),
 	)).add_child(camera);
+}
+
+fn setup_ui(mut commands: Commands) {
+	let focused_planet = commands.spawn((
+		Text::new("Planet Name"),
+		Node{
+			position_type: PositionType::Absolute,
+			bottom: Val::ZERO,
+			left: Val::Auto,
+			right: Val::Auto,
+			justify_self: JustifySelf::Center,
+			border: UiRect::all(Val::Px(2.0)),
+			..default()
+		},
+	)).id();
+	commands.insert_resource(UiElements{
+		focused_planet_name: focused_planet,
+	});
+}
+
+fn update_planet_focus_ui(
+	mut elements: Query<&mut Text>,
+	camera_parents: Query<&CameraParent>,
+	database: Res<Database>,
+	handles: Res<UiElements>,
+) {
+	let camera_parent = camera_parents.single();
+	let entry = database.get_entry(&camera_parent.centered_body);
+	let mut text = elements.get_mut(handles.focused_planet_name).unwrap();
+	text.0 = entry.name.clone();
 }
 
 fn process_camera_input(
@@ -231,12 +266,13 @@ fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
 		.insert_resource(Database::default().with_solar_system())
-		.add_systems(Startup, setup_camera)
+		.add_systems(Startup, (setup_camera, setup_ui))
 		.add_systems(Update, (
 			draw_orbits, draw_planets,
 			process_navigation_controls.before(update_camera_position),
 			process_camera_input.before(update_camera_position),
 			update_camera_position,
+			update_planet_focus_ui.after(process_navigation_controls),
 		))
 		.run();
 }

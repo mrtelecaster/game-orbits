@@ -126,7 +126,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	pub fn with_sol(mut self) -> Self {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let sun_info: Body<T> = Body::new_sol();
-		let sun_entry = DatabaseEntry::new(sun_info).with_scale(T::from_f64(1.0 / 100_000_000.0).unwrap());
+		let sun_entry = DatabaseEntry::new(sun_info, "Sol").with_scale(T::from_f64(1.0 / 100_000_000.0).unwrap());
 		self.add_entry(sun_handle.clone(), sun_entry);
 		self
 	}
@@ -143,7 +143,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(7.005).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(29.124).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(48.331).unwrap());
-		let mercury_entry = DatabaseEntry::new(mercury_info)
+		let mercury_entry = DatabaseEntry::new(mercury_info, "Mercury")
 			.with_parent(sun_handle.clone(), mercury_orbit)
 			.with_mean_anomaly_deg(T::from_f64(174.796).unwrap());
 		self.add_entry(mercury_handle, mercury_entry);
@@ -162,7 +162,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(3.39458).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(54.884).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(76.680).unwrap());
-		let venus_entry = DatabaseEntry::new(venus_info)
+		let venus_entry = DatabaseEntry::new(venus_info, "Venus")
 			.with_parent(sun_handle.clone(), venus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(	50.115).unwrap());
 		self.add_entry(venus_handle, venus_entry);
@@ -179,7 +179,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(0.00005).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(114.20783).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(-11.26064).unwrap());
-		let earth_entry = DatabaseEntry::new(earth_info)
+		let earth_entry = DatabaseEntry::new(earth_info, "Earth")
 			.with_parent(sun_handle.clone(), earth_orbit)
 			.with_mean_anomaly_deg(T::from_f64(358.617).unwrap());
 		self.add_entry(earth_handle.clone(), earth_entry);
@@ -193,7 +193,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(5.145).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(114.20783).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(-11.26064).unwrap());
-		let moon_entry = DatabaseEntry::new(moon_info)
+		let moon_entry = DatabaseEntry::new(moon_info, "Luna")
 			.with_parent(earth_handle.clone(), moon_orbit)
 			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
 		self.add_entry(moon_handle, moon_entry);
@@ -213,7 +213,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(1.850).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(286.5).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(49.57854).unwrap());
-		let mars_entry = DatabaseEntry::new(mars_info)
+		let mars_entry = DatabaseEntry::new(mars_info, "Mars")
 			.with_parent(sun_handle.clone(), mars_orbit)
 			.with_mean_anomaly_deg(T::from_f64(174.796).unwrap());
 		self.add_entry(mars_handle.clone(), mars_entry);
@@ -228,7 +228,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(1.093).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(381.5236635).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(83.14323972).unwrap());
-		let phobos_entry = DatabaseEntry::new(phobos_info)
+		let phobos_entry = DatabaseEntry::new(phobos_info, "Phobos")
 			.with_parent(mars_handle.clone(), phobos_orbit)
 			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
 		self.add_entry(phobos_handle, phobos_entry);
@@ -243,7 +243,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(0.93).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(386.1935449).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(80.97357149).unwrap());
-		let deimos_entry = DatabaseEntry::new(deimos_info)
+		let deimos_entry = DatabaseEntry::new(deimos_info, "Deimos")
 			.with_parent(mars_handle.clone(), deimos_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(deimos_handle, deimos_entry);
@@ -266,7 +266,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(1.303).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(273.867).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(100.464).unwrap());
-		let jupiter_entry = DatabaseEntry::new(jupiter_info)
+		let jupiter_entry = DatabaseEntry::new(jupiter_info, "Jupiter")
 			.with_parent(sun_handle.clone(), jupiter_orbit)
 			.with_mean_anomaly_deg(T::from_f64(20.020).unwrap());
 		self.add_entry(jupiter_handle.clone(), jupiter_entry);
@@ -281,7 +281,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(2.18312929).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(654.3518983).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(737.1542087).unwrap());
-		let io_entry = DatabaseEntry::new(io_info)
+		let io_entry = DatabaseEntry::new(io_info, "Io")
 			.with_parent(jupiter_handle.clone(), io_orbit)
 			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
 		self.add_entry(io_handle, io_entry);
@@ -296,7 +296,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(2.216347171).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(468.8993005).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(350.5260572).unwrap());
-		let europa_entry = DatabaseEntry::new(europa_info)
+		let europa_entry = DatabaseEntry::new(europa_info, "Europa")
 			.with_parent(jupiter_handle.clone(), europa_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(europa_handle, europa_entry);
@@ -311,7 +311,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(2.0381662).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(621.291691).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(341.6959921).unwrap());
-		let ganymede_entry = DatabaseEntry::new(ganymede_info)
+		let ganymede_entry = DatabaseEntry::new(ganymede_info, "Ganymede")
 			.with_parent(jupiter_handle.clone(), ganymede_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(ganymede_handle, ganymede_entry);
@@ -326,7 +326,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(2.017).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(698.8083584).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(339.4829654).unwrap());
-		let callisto_entry = DatabaseEntry::new(callisto_info)
+		let callisto_entry = DatabaseEntry::new(callisto_info, "Callisto")
 			.with_parent(jupiter_handle.clone(), callisto_orbit)
 			.with_mean_anomaly_deg(T::from_f64(839.9757519).unwrap());
 		self.add_entry(callisto_handle, callisto_entry);
@@ -341,7 +341,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(2.55350793607894).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(414.339943282274).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(342.032315906764).unwrap());
-		let amalthea_entry = DatabaseEntry::new(amalthea_info)
+		let amalthea_entry = DatabaseEntry::new(amalthea_info, "Amalthea")
 			.with_parent(jupiter_handle.clone(), amalthea_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(amalthea_handle, amalthea_entry);
@@ -356,7 +356,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(30.4865631823591).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(405.592890277337).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(57.7865255776614).unwrap());
-		let himalia_entry = DatabaseEntry::new(himalia_info)
+		let himalia_entry = DatabaseEntry::new(himalia_info, "Himalia")
 			.with_parent(jupiter_handle.clone(), himalia_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(himalia_handle, himalia_entry);
@@ -371,7 +371,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(29.645438545611).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(104.680792927026).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(254.812870711218).unwrap());
-		let elara_entry = DatabaseEntry::new(elara_info)
+		let elara_entry = DatabaseEntry::new(elara_info, "Elara")
 			.with_parent(jupiter_handle.clone(), elara_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(elara_handle, elara_entry);
@@ -386,7 +386,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(141.719099777028).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(333.722656460893).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(529.781057110863).unwrap());
-		let pasiphae_entry = DatabaseEntry::new(pasiphae_info)
+		let pasiphae_entry = DatabaseEntry::new(pasiphae_info, "Pasiphae")
 			.with_parent(jupiter_handle.clone(), pasiphae_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(pasiphae_handle, pasiphae_entry);
@@ -401,7 +401,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(153.516632270518).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(326.138400070621).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(330.01471478535).unwrap());
-		let sinope_entry = DatabaseEntry::new(sinope_info)
+		let sinope_entry = DatabaseEntry::new(sinope_info, "Sinope")
 			.with_parent(jupiter_handle.clone(), sinope_orbit)
 			.with_mean_anomaly_deg(T::from_f64(578.187135014671).unwrap());
 		self.add_entry(sinope_handle, sinope_entry);
@@ -416,7 +416,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(27.1161743142435).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(1.25211821789787).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(64.8726214272199).unwrap());
-		let lysithea_entry = DatabaseEntry::new(lysithea_info)
+		let lysithea_entry = DatabaseEntry::new(lysithea_info, "Lysithea")
 			.with_parent(jupiter_handle.clone(), lysithea_orbit)
 			.with_mean_anomaly_deg(T::from_f64(158.993906489824).unwrap());
 		self.add_entry(lysithea_handle, lysithea_entry);
@@ -431,7 +431,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(164.964353121975).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(143.056427256701).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(199.239805499578).unwrap());
-		let carme_entry = DatabaseEntry::new(carme_info)
+		let carme_entry = DatabaseEntry::new(carme_info, "Carma")
 			.with_parent(jupiter_handle.clone(), carme_orbit)
 			.with_mean_anomaly_deg(T::from_f64(545.059221473009).unwrap());
 		self.add_entry(carme_handle, carme_entry);
@@ -446,7 +446,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(151.631855563574).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(39.1941066220987).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(131.881909593109).unwrap());
-		let ananke_entry = DatabaseEntry::new(ananke_info)
+		let ananke_entry = DatabaseEntry::new(ananke_info, "Ananke")
 			.with_parent(jupiter_handle.clone(), ananke_orbit)
 			.with_mean_anomaly_deg(T::from_f64(365.178243021899).unwrap());
 		self.add_entry(ananke_handle, ananke_entry);
@@ -461,7 +461,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(27.63631).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(190.18497).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(312.92965).unwrap());
-		let leda_entry = DatabaseEntry::new(leda_info)
+		let leda_entry = DatabaseEntry::new(leda_info, "Leda")
 			.with_parent(jupiter_handle.clone(), leda_orbit)
 			.with_mean_anomaly_deg(T::from_f64(137.02571).unwrap());
 		self.add_entry(leda_handle, leda_entry);
@@ -484,7 +484,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(2.485).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(339.392).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(113.665).unwrap());
-		let saturn_entry = DatabaseEntry::new(saturn_info)
+		let saturn_entry = DatabaseEntry::new(saturn_info, "Saturn")
 			.with_parent(sun_handle.clone(), saturn_orbit)
 			.with_mean_anomaly_deg(T::from_f64(317.020).unwrap());
 		self.add_entry(saturn_handle.clone(), saturn_entry);
@@ -499,7 +499,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(29.18891093).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.3070822).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(449.3704298).unwrap());
-		let mimas_entry = DatabaseEntry::new(mimas_info)
+		let mimas_entry = DatabaseEntry::new(mimas_info, "Mimas")
 			.with_parent(saturn_handle.clone(), mimas_orbit)
 			.with_mean_anomaly_deg(T::from_f64(772.976419).unwrap());
 		self.add_entry(mimas_handle, mimas_entry);
@@ -514,7 +514,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(28.04279097).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(169.5204865).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(264.6781976).unwrap());
-		let enceladus_entry = DatabaseEntry::new(enceladus_info)
+		let enceladus_entry = DatabaseEntry::new(enceladus_info, "Enceladus")
 			.with_parent(saturn_handle.clone(), enceladus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(384.1198896).unwrap());
 		self.add_entry(enceladus_handle, enceladus_entry);
@@ -529,7 +529,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(26.97242049).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(169.1532561).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(496.8246271).unwrap());
-		let tethys_entry = DatabaseEntry::new(tethys_info)
+		let tethys_entry = DatabaseEntry::new(tethys_info, "Tethys")
 			.with_parent(saturn_handle.clone(), tethys_orbit)
 			.with_mean_anomaly_deg(T::from_f64(502.6123366).unwrap());
 		self.add_entry(tethys_handle, tethys_entry);
@@ -544,7 +544,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(28.05084794).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(169.5723087).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(5080.2590124).unwrap());
-		let dione_entry = DatabaseEntry::new(dione_info)
+		let dione_entry = DatabaseEntry::new(dione_info, "Dione")
 			.with_parent(saturn_handle.clone(), dione_orbit)
 			.with_mean_anomaly_deg(T::from_f64(856.824114).unwrap());
 		self.add_entry(dione_handle, dione_entry);
@@ -559,7 +559,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(27.94971857).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(168.8079837).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(360.9692475).unwrap());
-		let rhea_entry = DatabaseEntry::new(rhea_info)
+		let rhea_entry = DatabaseEntry::new(rhea_info, "Rhea")
 			.with_parent(saturn_handle.clone(), rhea_orbit)
 			.with_mean_anomaly_deg(T::from_f64(448.7342263).unwrap());
 		self.add_entry(rhea_handle, rhea_entry);
@@ -574,7 +574,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(27.71621075).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(169.1427802).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(336.2491384).unwrap());
-		let titan_entry = DatabaseEntry::new(titan_info)
+		let titan_entry = DatabaseEntry::new(titan_info, "Titan")
 			.with_parent(saturn_handle.clone(), titan_orbit)
 			.with_mean_anomaly_deg(T::from_f64(143.0542442).unwrap());
 		self.add_entry(titan_handle, titan_entry);
@@ -589,7 +589,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(27.0344979012323).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(168.9).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(182.895).unwrap());
-		let hyperion_entry = DatabaseEntry::new(hyperion_info)
+		let hyperion_entry = DatabaseEntry::new(hyperion_info, "Hyperion")
 			.with_parent(saturn_handle.clone(), hyperion_orbit)
 			.with_mean_anomaly_deg(T::from_f64(301.6).unwrap());
 		self.add_entry(hyperion_handle, hyperion_entry);
@@ -604,7 +604,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(17.25375588).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(139.3182554).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(369.2974058).unwrap());
-		let iapetus_entry = DatabaseEntry::new(iapetus_info)
+		let iapetus_entry = DatabaseEntry::new(iapetus_info, "Iapetus")
 			.with_parent(saturn_handle.clone(), iapetus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(551.098555).unwrap());
 		self.add_entry(iapetus_handle, iapetus_entry);
@@ -619,7 +619,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(0.0151781240198135).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
-		let phoebe_entry = DatabaseEntry::new(phoebe_info)
+		let phoebe_entry = DatabaseEntry::new(phoebe_info, "Phoebe")
 			.with_parent(saturn_handle.clone(), phoebe_orbit)
 			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
 		self.add_entry(phoebe_handle, phoebe_entry);
@@ -634,7 +634,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(0.000007105811891727).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
-		let janus_entry = DatabaseEntry::new(janus_info)
+		let janus_entry = DatabaseEntry::new(janus_info, "Janus")
 			.with_parent(saturn_handle.clone(), janus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
 		self.add_entry(janus_handle, janus_entry);
@@ -657,7 +657,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(0.773).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(96.998857).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(74.006).unwrap());
-		let uranus_entry = DatabaseEntry::new(uranus_info)
+		let uranus_entry = DatabaseEntry::new(uranus_info, "Uranus")
 			.with_parent(sun_handle.clone(), uranus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(142.238600).unwrap());
 		self.add_entry(uranus_handle.clone(), uranus_entry);
@@ -672,7 +672,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(97.79230874).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.6951854).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(236.6892802).unwrap());
-		let ariel_entry = DatabaseEntry::new(ariel_info)
+		let ariel_entry = DatabaseEntry::new(ariel_info, "Ariel")
 			.with_parent(uranus_handle.clone(), ariel_orbit)
 			.with_mean_anomaly_deg(T::from_f64(583.1923962).unwrap());
 		self.add_entry(ariel_handle, ariel_entry);
@@ -687,7 +687,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(97.682239322).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.7113413).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(521.5502336).unwrap());
-		let umbriel_entry = DatabaseEntry::new(umbriel_info)
+		let umbriel_entry = DatabaseEntry::new(umbriel_info, "Umbriel")
 			.with_parent(uranus_handle.clone(), umbriel_orbit)
 			.with_mean_anomaly_deg(T::from_f64(837.2597847).unwrap());
 		self.add_entry(umbriel_handle, umbriel_entry);
@@ -702,7 +702,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(97.78930872).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.6116584).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(399.5640193).unwrap());
-		let titania_entry = DatabaseEntry::new(titania_info)
+		let titania_entry = DatabaseEntry::new(titania_info, "Titania")
 			.with_parent(uranus_handle.clone(), titania_orbit)
 			.with_mean_anomaly_deg(T::from_f64(496.5752932).unwrap());
 		self.add_entry(titania_handle, titania_entry);
@@ -717,7 +717,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(97.87882122).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.7422432).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(288.925047).unwrap());
-		let oberon_entry = DatabaseEntry::new(oberon_info)
+		let oberon_entry = DatabaseEntry::new(oberon_info, "Oberon")
 			.with_parent(uranus_handle.clone(), oberon_orbit)
 			.with_mean_anomaly_deg(T::from_f64(472.6703921).unwrap());
 		self.add_entry(oberon_handle, oberon_entry);
@@ -732,7 +732,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(96.44799101).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(163.4949965).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(242.2809905).unwrap());
-		let miranda_entry = DatabaseEntry::new(miranda_info)
+		let miranda_entry = DatabaseEntry::new(miranda_info, "Miranda")
 			.with_parent(uranus_handle.clone(), miranda_orbit)
 			.with_mean_anomaly_deg(T::from_f64(143.0330121).unwrap());
 		self.add_entry(miranda_handle, miranda_entry);
@@ -755,7 +755,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(1.770).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(273.187).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(131.783).unwrap());
-		let neptune_entry = DatabaseEntry::new(neptune_info)
+		let neptune_entry = DatabaseEntry::new(neptune_info, "Neptune")
 			.with_parent(sun_handle.clone(), neptune_orbit)
 			.with_mean_anomaly_deg(T::from_f64(317.020).unwrap());
 		self.add_entry(neptune_handle.clone(), neptune_entry);
@@ -770,7 +770,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(129.9699061).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(217.2530657).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(521.6797862 - 360.0).unwrap());
-		let triton_entry = DatabaseEntry::new(triton_info)
+		let triton_entry = DatabaseEntry::new(triton_info, "Triton")
 			.with_parent(neptune_handle.clone(), triton_orbit)
 			.with_mean_anomaly_deg(T::from_f64(829.2581612).unwrap());
 		self.add_entry(triton_handle, triton_entry);
@@ -785,7 +785,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(5.0672309310494).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(320.104934616101).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(616.561942032962 - 360.0).unwrap());
-		let nereid_entry = DatabaseEntry::new(nereid_info)
+		let nereid_entry = DatabaseEntry::new(nereid_info, "Nereid")
 			.with_parent(neptune_handle.clone(), nereid_orbit)
 			.with_mean_anomaly_deg(T::from_f64(684.0532414137 - 360.0).unwrap());
 		self.add_entry(nereid_handle, nereid_entry);
@@ -800,7 +800,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(0.0272397898144598).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
-		let naiad_entry = DatabaseEntry::new(naiad_info)
+		let naiad_entry = DatabaseEntry::new(naiad_info, "Naiad")
 			.with_parent(neptune_handle.clone(), naiad_orbit)
 			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
 		self.add_entry(naiad_handle, naiad_entry);
@@ -815,7 +815,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(28.635825609126).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(49.1486489463042).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(178.660268240832).unwrap());
-		let thalassa_entry = DatabaseEntry::new(thalassa_info)
+		let thalassa_entry = DatabaseEntry::new(thalassa_info, "Thalassa")
 			.with_parent(neptune_handle.clone(), thalassa_orbit)
 			.with_mean_anomaly_deg(T::from_f64(187.573079498586).unwrap());
 		self.add_entry(thalassa_handle, thalassa_entry);
@@ -830,7 +830,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(0.001238965071423).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
-		let despina_entry = DatabaseEntry::new(despina_info)
+		let despina_entry = DatabaseEntry::new(despina_info, "Despina")
 			.with_parent(neptune_handle.clone(), despina_orbit)
 			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
 		self.add_entry(despina_handle, despina_entry);
@@ -845,7 +845,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(28.5712798372164).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(48.6938364381423).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(188.29717200708).unwrap());
-		let galatea_entry = DatabaseEntry::new(galatea_info)
+		let galatea_entry = DatabaseEntry::new(galatea_info, "Galatea")
 			.with_parent(neptune_handle.clone(), galatea_orbit)
 			.with_mean_anomaly_deg(T::from_f64(216.667607835566).unwrap());
 		self.add_entry(galatea_handle, galatea_entry);
@@ -860,7 +860,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_inclination_deg(T::from_f64(28.3531487332235).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(48.9078558843833).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(378.844329275267).unwrap());
-		let larissa_entry = DatabaseEntry::new(larissa_info)
+		let larissa_entry = DatabaseEntry::new(larissa_info, "Larissa")
 			.with_parent(neptune_handle.clone(), larissa_orbit)
 			.with_mean_anomaly_deg(T::from_f64(428.613425343462).unwrap());
 		self.add_entry(larissa_handle, larissa_entry);
@@ -880,7 +880,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let eris_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(1.638e22).unwrap())
 			.with_radius_km(T::from_f64(1163.0).unwrap());
-		let eris_entry = DatabaseEntry::new(eris_info)
+		let eris_entry = DatabaseEntry::new(eris_info, "Eris")
 			.with_parent(sun_handle.clone(), eris_orbit)
 			.with_mean_anomaly_deg(T::from_f64(205.989).unwrap());
 		self.add_entry(eris_handle.clone(), eris_entry);
@@ -895,7 +895,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let dysnomia_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(8.2e19).unwrap())
 			.with_radius_km(T::from_f64(615.0/2.0).unwrap());
-		let dysnomia_entry = DatabaseEntry::new(dysnomia_info)
+		let dysnomia_entry = DatabaseEntry::new(dysnomia_info, "Dysnomia")
 			.with_parent(eris_handle.clone(), dysnomia_orbit)
 			.with_mean_anomaly_deg(T::from_f64(205.989).unwrap());
 		self.add_entry(dysnomia_handle, dysnomia_entry);
@@ -910,7 +910,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let haumea_info: Body<T> = Body::default()
 			.with_radius_km(T::from_f64(780.0).unwrap())
 			.with_mass_kg(T::from_f64(4.006e21).unwrap());
-		let haumea_entry = DatabaseEntry::new(haumea_info)
+		let haumea_entry = DatabaseEntry::new(haumea_info, "Haumea")
 			.with_parent(sun_handle.clone(), haumea_orbit)
 			.with_mean_anomaly_deg(T::from_f64(218.205).unwrap());
 		self.add_entry(haumea_handle.clone(), haumea_entry);
@@ -925,7 +925,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let hiiaka_info: Body<T> = Body::default()
 			.with_radius_km(T::from_f64(369.0/2.0).unwrap())
 			.with_mass_kg(T::from_f64(1.79e19).unwrap());
-		let hiiaka_entry = DatabaseEntry::new(hiiaka_info)
+		let hiiaka_entry = DatabaseEntry::new(hiiaka_info, "Hi'iaka")
 			.with_parent(haumea_handle.clone(), hiiaka_orbit)
 			.with_mean_anomaly_deg(T::from_f64(152.8).unwrap());
 		self.add_entry(hiiaka_handle, hiiaka_entry);
@@ -940,7 +940,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let namaka_info: Body<T> = Body::default()
 			.with_radius_km(T::from_f64(85.0).unwrap())
 			.with_mass_kg(T::from_f64(1.79e18).unwrap());
-		let namaka_entry = DatabaseEntry::new(namaka_info)
+		let namaka_entry = DatabaseEntry::new(namaka_info, "Namaka")
 			.with_parent(haumea_handle.clone(), namaka_orbit)
 			.with_mean_anomaly_deg(T::from_f64(178.5).unwrap());
 		self.add_entry(namaka_handle, namaka_entry);
@@ -1104,15 +1104,16 @@ impl<H, T> Default for Database<H, T> {
 
 pub struct DatabaseEntry<H, T> {
 	pub parent: Option<H>,
+	pub name: String,
 	pub info: Body<T>,
 	pub orbit: Option<OrbitalElements<T>>,
 	pub mean_anomaly_at_epoch: T,
 	pub scale: T,
 }
 impl<H, T> DatabaseEntry<H, T> where T: Float + FromPrimitive + SubAssign {
-	pub fn new(info: Body<T>) -> Self {
+	pub fn new<S>(info: Body<T>, name: S) -> Self where S: Into<String> {
 		Self{
-			info,
+			info, name: name.into(),
 			parent: None, orbit: None, mean_anomaly_at_epoch: T::from_f64(0.0).unwrap(),
 			scale: T::from_f64(1.0 / 3_000_000.0).unwrap(),
 		}
