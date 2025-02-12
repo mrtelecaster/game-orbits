@@ -21,6 +21,9 @@ const CAM_MIN_DISTANCE: f32 = 0.3;
 const CAM_MAX_DISTANCE: f32 = 1000000.0;
 const CAM_ZOOM_SPEED: f32 = 0.08;
 const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_JUPITER as usize;
+const CHANGE_VIEW_ORBITS: KeyCode = KeyCode::Digit1;
+const TOGGLE_VIEW_SOI: KeyCode = KeyCode::Digit2;
+const TOGGLE_VIEW_APSIS: KeyCode = KeyCode::Digit3;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
@@ -33,6 +36,29 @@ const APSIS_SIZE_MAX: f32 = 2000.0;
 
 type Database = BevyPlanetDatabase<usize>;
 
+#[derive(Clone, Copy, PartialEq)]
+enum OrbitViewMode {
+	All,
+	Children,
+	Selected,
+}
+impl OrbitViewMode {
+	pub fn next(&self) -> Self {
+		match self {
+			Self::All => Self::Children,
+			Self::Children => Self::Selected,
+			Self::Selected => Self::All,
+		}
+	}
+	pub fn to_str(&self) -> &'static str {
+		match self {
+			Self::All => "All",
+			Self::Children => "Children",
+			Self::Selected => "Selected",
+		}
+	}
+}
+
 #[derive(Resource)]
 struct UiElements {
 	parent_planet_name: Entity,
@@ -40,6 +66,9 @@ struct UiElements {
 	satellite_name: Entity,
 	prev_planet_name: Entity,
 	next_planet_name: Entity,
+	control_view_orbits: Entity,
+	control_view_soi: Entity,
+	control_view_apsis: Entity,
 }
 
 #[derive(Component)]
@@ -48,6 +77,9 @@ struct CameraParent {
 	pub yaw: f32,
 	pub pitch: f32,
 	pub zoom: f32,
+	pub view_apsis: bool,
+	pub view_soi: bool,
+	pub view_orbit: OrbitViewMode
 }
 impl CameraParent {
 	pub fn centered_on(mut self, handle: usize) -> Self {
@@ -57,7 +89,7 @@ impl CameraParent {
 }
 impl Default for CameraParent {
 	fn default() -> Self {
-		Self{ yaw: 0.0, pitch: 0.0, zoom: 0.1, centered_body: 0 }
+		Self{ yaw: 0.0, pitch: 0.0, zoom: 0.1, centered_body: 0, view_apsis: false, view_soi: true, view_orbit: OrbitViewMode::All }
 	}
 }
 
@@ -78,6 +110,31 @@ fn setup_camera(mut commands: Commands) {
 }
 
 fn setup_ui(mut commands: Commands) {
+	// controls text
+	let font = TextFont{
+		font_size: 14.0,
+		..default()
+	};
+	let control_camera_up = commands.spawn((Text::new("[W] Rotate camera up"), font.clone())).id();
+	let control_camera_down = commands.spawn((Text::new("[S] Rotate camera down"), font.clone())).id();
+	let control_camera_left = commands.spawn((Text::new("[A] Rotate camera left"), font.clone())).id();
+	let control_camera_right = commands.spawn((Text::new("[D] Rotate camera right"), font.clone())).id();
+	let control_zoom_in = commands.spawn((Text::new("[+] Zoom in"), font.clone())).id();
+	let control_zoom_out = commands.spawn((Text::new("[-] Zoom in"), font.clone())).id();
+	let control_view_orbits = commands.spawn((Text::new("[1] Change orbit visibility: All orbits"), font.clone())).id();
+	let control_view_soi = commands.spawn((Text::new("[2] Toggle SOI visibility: Visible"), font.clone())).id();
+	let control_view_apsis = commands.spawn((Text::new("[3] Toggle -apsis visibility: Visible"), font.clone())).id();
+	let _controls_container = commands.spawn(Node{
+		position_type: PositionType::Absolute,
+		left: Val::Px(0.0),
+		top: Val::Px(0.0),
+		flex_direction: FlexDirection::Column,
+		..default()
+	}).add_child(control_camera_up).add_child(control_camera_down).add_child(control_camera_left).add_child(control_camera_right)
+		.add_child(control_zoom_in).add_child(control_zoom_out)
+		.add_child(control_view_orbits).add_child(control_view_soi).add_child(control_view_apsis)
+		.id();
+	// navigation text
 	let text_alpha = 0.4;
 	let transparent_text_color = Color::linear_rgba(1.0, 1.0, 1.0, text_alpha);
 	let parent_planet_name = commands.spawn((
@@ -125,7 +182,32 @@ fn setup_ui(mut commands: Commands) {
 		satellite_name,
 		prev_planet_name,
 		next_planet_name,
+		control_view_orbits,
+		control_view_soi,
+		control_view_apsis,
 	});
+}
+
+fn update_controls_ui(
+	mut elements: Query<&mut Text>,
+	camera_parents: Query<&CameraParent>,
+	handles: Res<UiElements>,
+){
+	let camera_parent = camera_parents.single();
+	let mut text = elements.get_mut(handles.control_view_orbits).unwrap();
+	text.0 = format!("[1] Change orbit view mode: {}", camera_parent.view_orbit.to_str());
+	text = elements.get_mut(handles.control_view_soi).unwrap();
+	let visibility_str = match camera_parent.view_soi {
+		true => "Visible",
+		false => "Hidden",
+	};
+	text.0 = format!("[2] Toggle SOI visibility: {}", visibility_str);
+	text = elements.get_mut(handles.control_view_apsis).unwrap();
+	let visibility_str = match camera_parent.view_apsis {
+		true => "Visible",
+		false => "Hidden",
+	};
+	text.0 = format!("[3] Toggle -apsis visibility: {}", visibility_str);
 }
 
 fn update_planet_focus_ui(
@@ -269,6 +351,22 @@ fn process_navigation_controls(
 	}
 }
 
+fn process_visibility_input(
+	mut camera_parents: Query<&mut CameraParent>,
+	keyboard: Res<ButtonInput<KeyCode>>,
+){
+	let mut camera_parent = camera_parents.single_mut();
+	if keyboard.just_pressed(TOGGLE_VIEW_APSIS) {
+		camera_parent.view_apsis = !camera_parent.view_apsis;
+	}
+	if keyboard.just_pressed(TOGGLE_VIEW_SOI) {
+		camera_parent.view_soi = !camera_parent.view_soi;
+	}
+	if keyboard.just_pressed(CHANGE_VIEW_ORBITS) {
+		camera_parent.view_orbit = camera_parent.view_orbit.next();
+	}
+}
+
 fn update_camera_position(
 	mut camera_parents: Query<(&mut Transform, &CameraParent), Without<Camera3d>>,
 	mut cameras: Query<&mut Transform, (With<Camera3d>, Without<CameraParent>)>,
@@ -293,44 +391,52 @@ fn draw_orbits(
 	let origin_body = camera_parent.centered_body;
 	let step = TAU / (ORBIT_SEGMENTS-1) as f32;
 	for (handle, entry) in db.iter() {
+		let heirarchy = db.get_parents(&handle);
 		if let Some(parent_handle) = entry.parent {
-			let failure_msg = format!("Failed to find relative position between origin body {} and relative body {}", origin_body, parent_handle);
-			let parent_pos = db.relative_position(&origin_body, &parent_handle).expect(&failure_msg) * SCALE;
-			let mut points: Vec<(f32, Vec3)> = Vec::new();
-			// get orbit path
-			for i in 0..ORBIT_SEGMENTS {
-				let m = step * i as f32;
-				let m_1 = step * (i+1) as f32;
-				let pos = db.position_at_mean_anomaly(handle, m) * SCALE;
-				points.push((m, parent_pos + pos));
-				if m <= entry.mean_anomaly_at_epoch && m_1 >= entry.mean_anomaly_at_epoch {
-					points.push((
-						entry.mean_anomaly_at_epoch,
-						parent_pos + db.position_at_mean_anomaly(handle, entry.mean_anomaly_at_epoch) * SCALE
-					));
+			let view_all = camera_parent.view_orbit == OrbitViewMode::All;
+			let view_heirarchy = camera_parent.view_orbit == OrbitViewMode::Children && heirarchy.contains(&camera_parent.centered_body);
+			let view_selected = camera_parent.view_orbit == OrbitViewMode::Selected && *handle == camera_parent.centered_body;
+			if view_all || view_heirarchy || view_selected {
+				let failure_msg = format!("Failed to find relative position between origin body {} and relative body {}", origin_body, parent_handle);
+				let parent_pos = db.relative_position(&origin_body, &parent_handle).expect(&failure_msg) * SCALE;
+				let mut points: Vec<(f32, Vec3)> = Vec::new();
+				// get orbit path
+				for i in 0..ORBIT_SEGMENTS {
+					let m = step * i as f32;
+					let m_1 = step * (i+1) as f32;
+					let pos = db.position_at_mean_anomaly(handle, m) * SCALE;
+					points.push((m, parent_pos + pos));
+					if m <= entry.mean_anomaly_at_epoch && m_1 >= entry.mean_anomaly_at_epoch {
+						points.push((
+							entry.mean_anomaly_at_epoch,
+							parent_pos + db.position_at_mean_anomaly(handle, entry.mean_anomaly_at_epoch) * SCALE
+						));
+					}
+				}
+				for i in 0..points.len()-1 {
+					let (m_0, p_0) = points[i];
+					let (m_1, p_1) = points[i+1];
+					let mut t_0 = (m_0 - entry.mean_anomaly_at_epoch) / TAU;
+					let mut t_1 = (m_1 - entry.mean_anomaly_at_epoch) / TAU;
+					while t_0 < 0.0 {
+						t_0 += 1.0;
+					}
+					while t_1 <= 0.0 {
+						t_1 += 1.0;
+					}
+					let c_0 = ORBIT_COLOR.with_alpha(t_0.powi(2));
+					let c_1 = ORBIT_COLOR.with_alpha(t_1.powi(2));
+					gizmos.line_gradient(p_0, p_1, c_0, c_1);
+				}
+				if camera_parent.view_apsis {
+					// draw apoapsis/periapsis
+					let pos_periapsis = db.position_at_mean_anomaly(handle, 0.0) * SCALE;
+					let pos_apoapsis = db.position_at_mean_anomaly(handle, PI) * SCALE;
+					let apsis_size = APSIS_SIZE_MIN.lerp(APSIS_SIZE_MAX, camera_parent.zoom.powf(3.0));
+					gizmos.sphere(pos_periapsis + parent_pos, apsis_size, PERIAPSIS_COLOR);
+					gizmos.sphere(pos_apoapsis + parent_pos, apsis_size, APOAPSIS_COLOR);
 				}
 			}
-			for i in 0..points.len()-1 {
-				let (m_0, p_0) = points[i];
-				let (m_1, p_1) = points[i+1];
-				let mut t_0 = (m_0 - entry.mean_anomaly_at_epoch) / TAU;
-				let mut t_1 = (m_1 - entry.mean_anomaly_at_epoch) / TAU;
-				while t_0 < 0.0 {
-					t_0 += 1.0;
-				}
-				while t_1 <= 0.0 {
-					t_1 += 1.0;
-				}
-				let c_0 = ORBIT_COLOR.with_alpha(t_0.powi(2));
-				let c_1 = ORBIT_COLOR.with_alpha(t_1.powi(2));
-				gizmos.line_gradient(p_0, p_1, c_0, c_1);
-			}
-			// draw apoapsis/periapsis
-			let pos_periapsis = db.position_at_mean_anomaly(handle, 0.0) * SCALE;
-			let pos_apoapsis = db.position_at_mean_anomaly(handle, PI) * SCALE;
-			let apsis_size = APSIS_SIZE_MIN.lerp(APSIS_SIZE_MAX, camera_parent.zoom.powf(3.0));
-			gizmos.sphere(pos_periapsis + parent_pos, apsis_size, PERIAPSIS_COLOR);
-			gizmos.sphere(pos_apoapsis + parent_pos, apsis_size, APOAPSIS_COLOR);
 		}
 	}
 }
@@ -343,8 +449,10 @@ fn draw_planets(mut gizmos: Gizmos, db: Res<Database>, camera_parents: Query<&Ca
 		let soi_radius = db.radius_soi(handle);
 		let info = entry.info.clone();
 		// info!("Scale radius: {} units", info.radius_avg_km() * scale);
-		gizmos.sphere(pos, soi_radius * SCALE, SOI_COLOR); // sphere of influence
 		gizmos.sphere(pos, info.radius_avg_m() * SCALE, PLANET_COLOR);
+		if camera_parent.view_soi {
+			gizmos.sphere(pos, soi_radius * SCALE, SOI_COLOR); // sphere of influence
+		}
 	}
 }
 
@@ -354,10 +462,12 @@ fn main() {
 		.insert_resource(Database::default().with_solar_system())
 		.add_systems(Startup, (setup_camera, setup_ui))
 		.add_systems(Update, (
-			draw_orbits, draw_planets,
+			process_visibility_input,
+			draw_orbits.after(process_visibility_input), draw_planets.after(process_visibility_input),
 			process_navigation_controls.before(update_camera_position),
 			process_camera_input.before(update_camera_position),
 			update_camera_position,
+			update_controls_ui.after(process_visibility_input),
 			update_planet_focus_ui.after(process_navigation_controls),
 		))
 		.run();
