@@ -35,7 +35,11 @@ type Database = BevyPlanetDatabase<usize>;
 
 #[derive(Resource)]
 struct UiElements {
+	parent_planet_name: Entity,
 	focused_planet_name: Entity,
+	satellite_name: Entity,
+	prev_planet_name: Entity,
+	next_planet_name: Entity,
 }
 
 #[derive(Component)]
@@ -74,20 +78,53 @@ fn setup_camera(mut commands: Commands) {
 }
 
 fn setup_ui(mut commands: Commands) {
-	let focused_planet = commands.spawn((
-		Text::new("Planet Name"),
+	let text_alpha = 0.4;
+	let transparent_text_color = Color::linear_rgba(1.0, 1.0, 1.0, text_alpha);
+	let parent_planet_name = commands.spawn((
+		Text::new("Parent"),
+		TextColor::from(transparent_text_color),
+	)).id();
+	let prev_planet_name = commands.spawn((
+		Text::new("Prev Planet"),
+		TextColor::from(transparent_text_color),
+	)).id();
+	let focused_planet_name = commands.spawn((
+		Text::new("Focused"),
+	)).id();
+	let next_planet_name = commands.spawn((
+		Text::new("Next Planet"),
+		TextColor::from(transparent_text_color),
+	)).id();
+	let focused_planet_row = commands.spawn(Node{
+		flex_direction: FlexDirection::Row,
+		column_gap: Val::Px(16.0),
+		..default()
+	}).add_child(prev_planet_name).add_child(focused_planet_name).add_child(next_planet_name).id();
+	let satellite_name = commands.spawn((
+		Text::new("Satellite"),
+		TextColor::from(transparent_text_color),
+	)).id();
+	let _planet_nav_container = commands.spawn(
 		Node{
 			position_type: PositionType::Absolute,
 			bottom: Val::ZERO,
 			left: Val::Auto,
 			right: Val::Auto,
 			justify_self: JustifySelf::Center,
-			border: UiRect::all(Val::Px(2.0)),
+			align_items: AlignItems::Center,
+			flex_direction: FlexDirection::Column,
 			..default()
 		},
-	)).id();
+	).add_child(parent_planet_name)
+		.add_child(focused_planet_row)
+		.add_child(satellite_name)
+		.id();
 	commands.insert_resource(UiElements{
-		focused_planet_name: focused_planet,
+		parent_planet_name,
+		focused_planet_name,
+		satellite_name,
+		prev_planet_name,
+		next_planet_name,
 	});
 }
 
@@ -97,10 +134,59 @@ fn update_planet_focus_ui(
 	database: Res<Database>,
 	handles: Res<UiElements>,
 ) {
+	let empty_string = String::from(" ");
 	let camera_parent = camera_parents.single();
 	let entry = database.get_entry(&camera_parent.centered_body);
+	// focused planet text
 	let mut text = elements.get_mut(handles.focused_planet_name).unwrap();
 	text.0 = entry.name.clone();
+	// parent planet text
+	text = elements.get_mut(handles.parent_planet_name).unwrap();
+	if let Some(parent_handle) = entry.parent {
+		let parent = database.get_entry(&parent_handle);
+		text.0 = parent.name.clone();
+	} else {
+		text.0 = empty_string.clone();
+	}
+	// satellite planet text
+	text = elements.get_mut(handles.satellite_name).unwrap();
+	let satellites = database.get_satellites(&camera_parent.centered_body);
+	if satellites.is_empty() {
+		text.0 = empty_string.clone();
+	} else {
+		let first_satellite = database.get_entry(&satellites[0]);
+		text.0 = first_satellite.name.clone();
+	}
+	// prev/next planet
+	if let Some(parent_handle) = entry.parent {
+		let siblings = database.get_satellites(&parent_handle);
+		let index = siblings.binary_search(&camera_parent.centered_body).unwrap();
+		let prev_index;
+		if index > 0 {
+			prev_index = index - 1;
+		} else {
+			prev_index = siblings.len() - 1;
+		}
+		let next_index;
+		if index < siblings.len() - 1 {
+			next_index = index + 1;
+		} else {
+			next_index = 0;
+		}
+		let prev_handle = siblings[prev_index];
+		let prev_entry = database.get_entry(&prev_handle);
+		text = elements.get_mut(handles.prev_planet_name).unwrap();
+		text.0 = prev_entry.name.clone();
+		let next_handle = siblings[next_index];
+		let next_entry = database.get_entry(&next_handle);
+		text = elements.get_mut(handles.next_planet_name).unwrap();
+		text.0 = next_entry.name.clone();
+	} else {
+		text = elements.get_mut(handles.prev_planet_name).unwrap();
+		text.0 = empty_string.clone();
+		text = elements.get_mut(handles.next_planet_name).unwrap();
+		text.0 = empty_string.clone();
+	}
 }
 
 fn process_camera_input(
