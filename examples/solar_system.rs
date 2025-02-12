@@ -5,10 +5,10 @@ use game_orbits::{BevyPlanetDatabase, handles::*};
 
 const SCALE: f32 = 1.0 / 20_000_000.0;
 
-const CAM_ROTATE_UP: KeyCode = KeyCode::ArrowUp;
-const CAM_ROTATE_DOWN: KeyCode = KeyCode::ArrowDown;
-const CAM_ROTATE_LEFT: KeyCode = KeyCode::ArrowLeft;
-const CAM_ROTATE_RIGHT: KeyCode = KeyCode::ArrowRight;
+const CAM_ROTATE_UP: KeyCode = KeyCode::KeyW;
+const CAM_ROTATE_DOWN: KeyCode = KeyCode::KeyS;
+const CAM_ROTATE_LEFT: KeyCode = KeyCode::KeyA;
+const CAM_ROTATE_RIGHT: KeyCode = KeyCode::KeyD;
 const CAM_ZOOM_IN: KeyCode = KeyCode::Equal;
 const CAM_ZOOM_OUT: KeyCode = KeyCode::Minus;
 const CAM_MAX_PITCH: f32 = 1.55; // rad
@@ -64,7 +64,7 @@ fn setup_camera(mut commands: Commands) {
 	)).add_child(camera);
 }
 
-fn process_input(
+fn process_camera_input(
 	keyboard: Res<ButtonInput<KeyCode>>, time: Res<Time>,
 	mut camera_parents: Query<&mut CameraParent>,
 ){
@@ -92,6 +92,56 @@ fn process_input(
 		camera_parent.zoom += CAM_ZOOM_SPEED * delta;
 	}
 	camera_parent.zoom = camera_parent.zoom.clamp(0.0, 1.0);
+}
+
+fn process_navigation_controls(
+	mut camera_parents: Query<&mut CameraParent>,
+	keyboard: Res<ButtonInput<KeyCode>>,
+	database: Res<Database>,
+) {
+	let mut camera_parent = camera_parents.single_mut();
+	if keyboard.just_pressed(KeyCode::ArrowDown) {
+		let children = database.get_satellites(&camera_parent.centered_body);
+		if !children.is_empty() {
+			camera_parent.centered_body = children[0];
+		}
+	}
+	if keyboard.just_pressed(KeyCode::ArrowUp) {
+		let entry = database.get_entry(&camera_parent.centered_body);
+		if let Some(parent_handle) = entry.parent {
+			camera_parent.centered_body = parent_handle;
+		}
+	}
+	if keyboard.just_pressed(KeyCode::ArrowRight) {
+		let entry = database.get_entry(&camera_parent.centered_body);
+		if let Some(parent_handle) = entry.parent {
+			let siblings = database.get_satellites(&parent_handle);
+			if siblings.len() > 0 {
+				let err_msg = format!("Siblings list did not contain handle {} (list: {:?})", camera_parent.centered_body, siblings);
+				let mut index = siblings.binary_search(&camera_parent.centered_body).expect(&err_msg);
+				index += 1;
+				if index >= siblings.len() {
+					index = 0;
+				}
+				camera_parent.centered_body = siblings[index];
+			}
+		}
+	}
+	if keyboard.just_pressed(KeyCode::ArrowLeft) {
+		let entry = database.get_entry(&camera_parent.centered_body);
+		if let Some(parent_handle) = entry.parent {
+			let siblings = database.get_satellites(&parent_handle);
+			if siblings.len() > 0 {
+				let err_msg = format!("Siblings list did not contain handle {} (list: {:?})", camera_parent.centered_body, siblings);
+				let mut index = siblings.binary_search(&camera_parent.centered_body).expect(&err_msg);
+				if index <= 0 {
+					index = siblings.len();
+				}
+				index -= 1;
+				camera_parent.centered_body = siblings[index];
+			}
+		}
+	}
 }
 
 fn update_camera_position(
@@ -180,7 +230,9 @@ fn main() {
 		.add_systems(Startup, setup_camera)
 		.add_systems(Update, (
 			draw_orbits, draw_planets,
-			process_input, update_camera_position.after(process_input),
+			process_navigation_controls.before(update_camera_position),
+			process_camera_input.before(update_camera_position),
+			update_camera_position,
 		))
 		.run();
 }

@@ -985,6 +985,25 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let mut entry = self.get_entry(origin);
 		// println!("\tSubtracting orbital position of {}", origin);
 		relative_position -= self.position_at_mean_anomaly(origin, entry.mean_anomaly_at_epoch);
+		// if origin body is already in the parent heirarchy of the relative body, find the relative body position
+		if let Ok(parent_relative_index) = relative_heirarchy.binary_search(origin) {
+			// println!("Reached heirarchy intersection at body {}", parent_handle);
+			let mut index = parent_relative_index;
+			let mut handle;
+			while index < relative_heirarchy.len() {
+				handle = &relative_heirarchy[index];
+				entry = self.get_entry(handle);
+				// println!("\tAdding orbital position of {}", handle);
+				relative_position += self.position_at_mean_anomaly(handle, entry.mean_anomaly_at_epoch);
+				// println!("Checking if body at index {} ({}) is the relative body {}", index, handle, relative);
+				if handle == relative {
+					return Some(relative_position);
+				}
+				// println!("Body at index {} ({}) is not the relative body {}. Incrementing index and trying again", index, handle, relative);
+				index += 1;
+				
+			}
+		}
 		while let Some(parent_handle) = &entry.parent {
 			entry = self.get_entry(parent_handle);
 			// println!("\tSubtracting orbital position of {}", parent_handle);
@@ -1025,7 +1044,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		}
 	}
 	/// Get a list of handles for satellites of the body with the input handle.
-	pub fn get_satellites(&self, body: &H) -> Vec<H> {
+	pub fn get_satellites(&self, body: &H) -> Vec<H> where H: Ord {
 		let mut satellites: Vec<H> = Vec::new();
 		for (handle, entry) in self.iter() {
 			if let Some(parent_handle) = &entry.parent {
@@ -1034,6 +1053,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 				}
 			}
 		}
+		satellites.sort();
 		satellites
 	}
 	/// Get the heirarchy of parent bodies of the input body
@@ -1048,7 +1068,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		}
 	}
 	/// Gets the combined mass of a body and all its satellites
-	pub fn get_combined_mass_kg(&self, body: &H) -> T {
+	pub fn get_combined_mass_kg(&self, body: &H) -> T where H: Ord {
 		let body_entry = self.get_entry(body);
 		let mut total_mass = body_entry.info.mass_kg();
 		for satellite_handle in self.get_satellites(body) {
@@ -1057,7 +1077,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		return total_mass;
 	}
 	/// Calculate the radius of the sphere of influence of the body with the given handle
-	pub fn radius_soi(&self, handle: &H) -> T {
+	pub fn radius_soi(&self, handle: &H) -> T where H: Ord {
 		let orbiting_body = self.bodies.get(&handle).unwrap();
 		let orbiting_body_info = orbiting_body.info.clone();
 		let orbiting_body_mass = self.get_combined_mass_kg(handle);
