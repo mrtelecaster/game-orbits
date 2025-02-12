@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use game_orbits::{BevyPlanetDatabase, handles::*};
 
 
-const SCALE: f32 = 1.0 / 50_000_000.0;
+const SCALE: f32 = 1.0 / 20_000_000.0;
 
 const CAM_ROTATE_UP: KeyCode = KeyCode::ArrowUp;
 const CAM_ROTATE_DOWN: KeyCode = KeyCode::ArrowDown;
@@ -14,9 +14,9 @@ const CAM_ZOOM_OUT: KeyCode = KeyCode::Minus;
 const CAM_MAX_PITCH: f32 = 1.55; // rad
 const CAM_ROTATE_SPEED: f32 = 0.8; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.3;
-const CAM_MAX_DISTANCE: f32 = 50000.0;
+const CAM_MAX_DISTANCE: f32 = 1000000.0;
 const CAM_ZOOM_SPEED: f32 = 0.08;
-const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_LARISSA as usize;
+const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_NAMAKA as usize;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
@@ -24,8 +24,8 @@ const PERIAPSIS_COLOR: Color = Color::srgb(1.0, 0.5, 0.0);
 const APOAPSIS_COLOR: Color = Color::srgb(0.0, 0.5, 1.0);
 const PLANET_COLOR: Color = Color::srgb(1.0, 0.1, 0.5);
 const SOI_COLOR: Color = Color::srgb(1.0, 1.0, 1.0);
-const APSIS_SIZE_MIN: f32 = 0.005;
-const APSIS_SIZE_MAX: f32 = 100.0;
+const APSIS_SIZE_MIN: f32 = 0.01;
+const APSIS_SIZE_MAX: f32 = 2000.0;
 
 type Database = BevyPlanetDatabase<usize>;
 

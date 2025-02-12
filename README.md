@@ -19,14 +19,12 @@ use in games.
 
 ### Usability
 
-I do not recommend using this library in your projects currently. It's a bit of
-a mess and the interface isn't very friendly and will likely change drastically
-as I start to actually use it for its intended purpose in my own games and make
-improvements based on that. However if you would like to use it eventually and
-have feedback on something you'd like the library to do, or on how you'd like
-the interface with the library to ideally function, I would love to hear it!
-Also, feedback/advice on how to more cleanly integrate the game engine feature
-flags would be very welcome.
+I do not recommend using this library in your projects currently. It's a bit of a mess and the
+interface isn't very friendly and will likely change drastically as I start to actually use it for
+its intended purpose in my own games and make improvements based on that. However constructive
+feedback is still welcome, whether it's feedback on how to make it more rusty and organized or
+feedback on how you'd like the library or its interface to function if you were to use it in your
+own game.
 
 ## Tests
 
@@ -37,6 +35,13 @@ only compiled in the `dev` profile when running examples or tests, but it does
 mean the first time compiling unit tests will take a significant amount of time
 as it compiles Bevy along with the tests. Building the library itself or its
 documentation should be quite fast.
+
+## Feature Flags
+
+The feature flags in this library add some additional wrapper structs and helper functions for using
+this library in various different game engines. Currently supports the Bevy engine with the `bevy`
+flag, and the Godot engine with the `godot` flag. See the files `feat_bevy.rs` and `feat_godot.rs`
+respectively to see what's added.
 
 ## References
 

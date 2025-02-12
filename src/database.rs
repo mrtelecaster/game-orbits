@@ -82,6 +82,11 @@ pub mod handles
 	pub const HANDLE_NESO: u16 = HANDLE_NEPTUNE + 13;
 	pub const HANDLE_HIPPOCAMP: u16 = HANDLE_NEPTUNE + 14;
 	pub const HANDLE_PLUTO: u16 = HANDLE_NEPTUNE + 17;
+	pub const HANDLE_ERIS: u16 = HANDLE_PLUTO + 1;
+	pub const HANDLE_DYSNOMIA: u16 = HANDLE_ERIS + 1;
+	pub const HANDLE_HAUMEA: u16 = HANDLE_ERIS + 2;
+	pub const HANDLE_HIIAKA: u16 = HANDLE_HAUMEA + 1;
+	pub const HANDLE_NAMAKA: u16 = HANDLE_HAUMEA + 2;
 }
 
 /// Holds the data for all the bodies being simulated
@@ -99,6 +104,12 @@ pub struct Database<H, T> {
 }
 impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone + Float + FromPrimitive + SubAssign {
 	/// populates the database with celestial bodies from our solar system
+	/// 
+	/// Due to some inconsistencies in the data sources used to hard code these, the orientations of
+	/// orbits and the bodies exact position along the orbit are not necessarily accurate to real
+	/// life, especially with moons of giant planets. This will be corrected eventually but for now
+	/// it's enough that the planets have eccentrity and inclination at all, that are authentic to
+	/// real life even if they're not strictly perfectly accurate.
 	pub fn with_solar_system(self) -> Self {
 		self.with_sol()
 			.with_mercury()
@@ -109,6 +120,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_saturn()
 			.with_uranus()
 			.with_neptune()
+			.with_dwarf_planets()
 	}
 	/// Adds our sun to the database
 	pub fn with_sol(mut self) -> Self {
@@ -306,17 +318,17 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		// Callisto
 		let callisto_handle = H::from_u16(handles::HANDLE_CALLISTO).unwrap();
 		let callisto_info: Body<T> = Body::default()
-			.with_mass_kg(T::from_f64(1.48e23).unwrap())
-			.with_radius_km(T::from_f64(2403.000).unwrap());
+			.with_mass_kg(T::from_f64(1.075938e23).unwrap())
+			.with_radius_km(T::from_f64(2_410.3).unwrap());
 		let callisto_orbit: OrbitalElements<T> = OrbitalElements::default()
-			.with_semimajor_axis_m(T::from_f64(1070615470.44541).unwrap())
-			.with_eccentricity(T::from_f64(0.00158762974782861).unwrap())
-			.with_inclination_deg(T::from_f64(2.0381662).unwrap())
-			.with_arg_of_periapsis_deg(T::from_f64(621.291691).unwrap())
-			.with_long_of_ascending_node_deg(T::from_f64(341.6959921).unwrap());
+			.with_semimajor_axis_km(T::from_f64(1_882_700.0).unwrap())
+			.with_eccentricity(T::from_f64(0.0074).unwrap())
+			.with_inclination_deg(T::from_f64(2.017).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(698.8083584).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(339.4829654).unwrap());
 		let callisto_entry = DatabaseEntry::new(callisto_info)
 			.with_parent(jupiter_handle.clone(), callisto_orbit)
-			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
+			.with_mean_anomaly_deg(T::from_f64(839.9757519).unwrap());
 		self.add_entry(callisto_handle, callisto_entry);
 		// Amalthea
 		let amalthea_handle = H::from_u16(handles::HANDLE_AMALTHEA).unwrap();
@@ -438,6 +450,21 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(jupiter_handle.clone(), ananke_orbit)
 			.with_mean_anomaly_deg(T::from_f64(365.178243021899).unwrap());
 		self.add_entry(ananke_handle, ananke_entry);
+		// Leda
+		let leda_handle = H::from_u16(handles::HANDLE_LEDA).unwrap();
+		let leda_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(5.68e15).unwrap())
+			.with_radius_km(T::from_f64(21.5).unwrap());
+		let leda_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(11_195_980.0).unwrap())
+			.with_eccentricity(T::from_f64(0.360749649973783).unwrap())
+			.with_inclination_deg(T::from_f64(27.63631).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(190.18497).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(312.92965).unwrap());
+		let leda_entry = DatabaseEntry::new(leda_info)
+			.with_parent(jupiter_handle.clone(), leda_orbit)
+			.with_mean_anomaly_deg(T::from_f64(137.02571).unwrap());
+		self.add_entry(leda_handle, leda_entry);
 		// return
 		self
 	}
@@ -837,6 +864,86 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(neptune_handle.clone(), larissa_orbit)
 			.with_mean_anomaly_deg(T::from_f64(428.613425343462).unwrap());
 		self.add_entry(larissa_handle, larissa_entry);
+		// return
+		self
+	}
+	pub fn with_dwarf_planets(mut self) -> Self {
+		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
+		// Eris
+		let eris_handle = H::from_u16(handles::HANDLE_ERIS).unwrap();
+		let eris_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_au(T::from_f64(67.864).unwrap())
+			.with_eccentricity(T::from_f64(0.43607).unwrap())
+			.with_inclination_deg(T::from_f64(44.040).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(35.951).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(151.639).unwrap());
+		let eris_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(1.638e22).unwrap())
+			.with_radius_km(T::from_f64(1163.0).unwrap());
+		let eris_entry = DatabaseEntry::new(eris_info)
+			.with_parent(sun_handle.clone(), eris_orbit)
+			.with_mean_anomaly_deg(T::from_f64(205.989).unwrap());
+		self.add_entry(eris_handle.clone(), eris_entry);
+		// Dysnomia
+		let dysnomia_handle = H::from_u16(handles::HANDLE_DYSNOMIA).unwrap();
+		let dysnomia_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(37_237.0).unwrap())
+			.with_eccentricity(T::from_f64(0.0062).unwrap())
+			.with_inclination_deg(T::from_f64(0.0).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(126.17).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(180.83).unwrap());
+		let dysnomia_info: Body<T> = Body::default()
+			.with_mass_kg(T::from_f64(8.2e19).unwrap())
+			.with_radius_km(T::from_f64(615.0/2.0).unwrap());
+		let dysnomia_entry = DatabaseEntry::new(dysnomia_info)
+			.with_parent(eris_handle.clone(), dysnomia_orbit)
+			.with_mean_anomaly_deg(T::from_f64(205.989).unwrap());
+		self.add_entry(dysnomia_handle, dysnomia_entry);
+		// Haumea
+		let haumea_handle = H::from_u16(handles::HANDLE_HAUMEA).unwrap();
+		let haumea_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_au(T::from_f64(43.116).unwrap())
+			.with_eccentricity(T::from_f64(0.19642).unwrap())
+			.with_inclination_deg(T::from_f64(28.2137).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(122.167).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(239.041).unwrap());
+		let haumea_info: Body<T> = Body::default()
+			.with_radius_km(T::from_f64(780.0).unwrap())
+			.with_mass_kg(T::from_f64(4.006e21).unwrap());
+		let haumea_entry = DatabaseEntry::new(haumea_info)
+			.with_parent(sun_handle.clone(), haumea_orbit)
+			.with_mean_anomaly_deg(T::from_f64(218.205).unwrap());
+		self.add_entry(haumea_handle.clone(), haumea_entry);
+		// Hi'iaka
+		let hiiaka_handle = H::from_u16(handles::HANDLE_HIIAKA).unwrap();
+		let hiiaka_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(49_880.0).unwrap())
+			.with_eccentricity(T::from_f64(0.0513).unwrap())
+			.with_inclination_deg(T::from_f64(126.356).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(206.766).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(154.1).unwrap());
+		let hiiaka_info: Body<T> = Body::default()
+			.with_radius_km(T::from_f64(369.0/2.0).unwrap())
+			.with_mass_kg(T::from_f64(1.79e19).unwrap());
+		let hiiaka_entry = DatabaseEntry::new(hiiaka_info)
+			.with_parent(haumea_handle.clone(), hiiaka_orbit)
+			.with_mean_anomaly_deg(T::from_f64(152.8).unwrap());
+		self.add_entry(hiiaka_handle, hiiaka_entry);
+		// Namaka
+		let namaka_handle = H::from_u16(handles::HANDLE_NAMAKA).unwrap();
+		let namaka_orbit: OrbitalElements<T> = OrbitalElements::default()
+			.with_semimajor_axis_km(T::from_f64(25_657.0).unwrap())
+			.with_eccentricity(T::from_f64(0.249).unwrap())
+			.with_inclination_deg(T::from_f64(113.013).unwrap())
+			.with_long_of_ascending_node_deg(T::from_f64(205.016).unwrap())
+			.with_arg_of_periapsis_deg(T::from_f64(178.9).unwrap());
+		let namaka_info: Body<T> = Body::default()
+			.with_radius_km(T::from_f64(85.0).unwrap())
+			.with_mass_kg(T::from_f64(1.79e18).unwrap());
+		let namaka_entry = DatabaseEntry::new(namaka_info)
+			.with_parent(haumea_handle.clone(), namaka_orbit)
+			.with_mean_anomaly_deg(T::from_f64(178.5).unwrap());
+		self.add_entry(namaka_handle, namaka_entry);
 		// return
 		self
 	}
