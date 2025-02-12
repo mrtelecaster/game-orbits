@@ -11,6 +11,10 @@ const CAM_ROTATE_LEFT: KeyCode = KeyCode::KeyA;
 const CAM_ROTATE_RIGHT: KeyCode = KeyCode::KeyD;
 const CAM_ZOOM_IN: KeyCode = KeyCode::Equal;
 const CAM_ZOOM_OUT: KeyCode = KeyCode::Minus;
+const CAM_FOCUS_NEXT_PLANET: KeyCode = KeyCode::ArrowRight;
+const CAM_FOCUS_PREV_PLANET: KeyCode = KeyCode::ArrowLeft;
+const CAM_FOCUS_PARENT: KeyCode = KeyCode::ArrowUp;
+const CAM_FOCUS_SATELLITES: KeyCode = KeyCode::ArrowDown;
 const CAM_MAX_PITCH: f32 = 1.55; // rad
 const CAM_ROTATE_SPEED: f32 = 0.8; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.3;
@@ -100,19 +104,19 @@ fn process_navigation_controls(
 	database: Res<Database>,
 ) {
 	let mut camera_parent = camera_parents.single_mut();
-	if keyboard.just_pressed(KeyCode::ArrowDown) {
+	if keyboard.just_pressed(CAM_FOCUS_SATELLITES) {
 		let children = database.get_satellites(&camera_parent.centered_body);
 		if !children.is_empty() {
 			camera_parent.centered_body = children[0];
 		}
 	}
-	if keyboard.just_pressed(KeyCode::ArrowUp) {
+	if keyboard.just_pressed(CAM_FOCUS_PARENT) {
 		let entry = database.get_entry(&camera_parent.centered_body);
 		if let Some(parent_handle) = entry.parent {
 			camera_parent.centered_body = parent_handle;
 		}
 	}
-	if keyboard.just_pressed(KeyCode::ArrowRight) {
+	if keyboard.just_pressed(CAM_FOCUS_NEXT_PLANET) {
 		let entry = database.get_entry(&camera_parent.centered_body);
 		if let Some(parent_handle) = entry.parent {
 			let siblings = database.get_satellites(&parent_handle);
@@ -127,7 +131,7 @@ fn process_navigation_controls(
 			}
 		}
 	}
-	if keyboard.just_pressed(KeyCode::ArrowLeft) {
+	if keyboard.just_pressed(CAM_FOCUS_PREV_PLANET) {
 		let entry = database.get_entry(&camera_parent.centered_body);
 		if let Some(parent_handle) = entry.parent {
 			let siblings = database.get_satellites(&parent_handle);
