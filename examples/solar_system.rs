@@ -193,7 +193,7 @@ fn draw_orbits(
 				while t_0 < 0.0 {
 					t_0 += 1.0;
 				}
-				while t_1 < 0.0 {
+				while t_1 <= 0.0 {
 					t_1 += 1.0;
 				}
 				let c_0 = ORBIT_COLOR.with_alpha(t_0.powi(2));
