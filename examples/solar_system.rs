@@ -121,13 +121,34 @@ fn draw_orbits(
 		if let Some(parent_handle) = entry.parent {
 			let failure_msg = format!("Failed to find relative position between origin body {} and relative body {}", origin_body, parent_handle);
 			let parent_pos = db.relative_position(&origin_body, &parent_handle).expect(&failure_msg) * SCALE;
-			// draw orbit path
-			for i in 0..ORBIT_SEGMENTS-1 {
-				let t_0 = step * i as f32;
-				let t_1 = step * (i + 1) as f32;
-				let pos_0 = db.position_at_mean_anomaly(handle, t_0) * SCALE;
-				let pos_1 = db.position_at_mean_anomaly(handle, t_1) * SCALE;
-				gizmos.line(pos_0 + parent_pos, pos_1 + parent_pos, ORBIT_COLOR);
+			let mut points: Vec<(f32, Vec3)> = Vec::new();
+			// get orbit path
+			for i in 0..ORBIT_SEGMENTS {
+				let m = step * i as f32;
+				let m_1 = step * (i+1) as f32;
+				let pos = db.position_at_mean_anomaly(handle, m) * SCALE;
+				points.push((m, parent_pos + pos));
+				if m <= entry.mean_anomaly_at_epoch && m_1 >= entry.mean_anomaly_at_epoch {
+					points.push((
+						entry.mean_anomaly_at_epoch,
+						parent_pos + db.position_at_mean_anomaly(handle, entry.mean_anomaly_at_epoch) * SCALE
+					));
+				}
+			}
+			for i in 0..points.len()-1 {
+				let (m_0, p_0) = points[i];
+				let (m_1, p_1) = points[i+1];
+				let mut t_0 = (m_0 - entry.mean_anomaly_at_epoch) / TAU;
+				let mut t_1 = (m_1 - entry.mean_anomaly_at_epoch) / TAU;
+				while t_0 < 0.0 {
+					t_0 += 1.0;
+				}
+				while t_1 < 0.0 {
+					t_1 += 1.0;
+				}
+				let c_0 = ORBIT_COLOR.with_alpha(t_0);
+				let c_1 = ORBIT_COLOR.with_alpha(t_1);
+				gizmos.line_gradient(p_0, p_1, c_0, c_1);
 			}
 			// draw apoapsis/periapsis
 			let pos_periapsis = db.position_at_mean_anomaly(handle, 0.0) * SCALE;
