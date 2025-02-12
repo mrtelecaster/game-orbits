@@ -16,7 +16,7 @@ const CAM_ROTATE_SPEED: f32 = 0.8; // rad/s
 const CAM_MIN_DISTANCE: f32 = 0.3;
 const CAM_MAX_DISTANCE: f32 = 1000000.0;
 const CAM_ZOOM_SPEED: f32 = 0.08;
-const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_NAMAKA as usize;
+const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_JUPITER as usize;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
@@ -146,8 +146,8 @@ fn draw_orbits(
 				while t_1 < 0.0 {
 					t_1 += 1.0;
 				}
-				let c_0 = ORBIT_COLOR.with_alpha(t_0);
-				let c_1 = ORBIT_COLOR.with_alpha(t_1);
+				let c_0 = ORBIT_COLOR.with_alpha(t_0.powi(2));
+				let c_1 = ORBIT_COLOR.with_alpha(t_1.powi(2));
 				gizmos.line_gradient(p_0, p_1, c_0, c_1);
 			}
 			// draw apoapsis/periapsis
