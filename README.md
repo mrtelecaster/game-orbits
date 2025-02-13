@@ -1,7 +1,7 @@
 # Game Orbits Library
 
-[![Static Badge](https://img.shields.io/badge/Patreon-FernandoGamedev-F96854?logo=patreon)](https://patreon.com/fernandogamedev)
-[![Static Badge](https://img.shields.io/badge/Ko--Fi-Fernando_Gamedev-72A5F2?logo=kofi)](https://ko-fi.com/fernando_gamedev)
+[![Static Badge](https://img.shields.io/badge/Patreon-F96854?logo=patreon)](https://patreon.com/fernandogamedev)
+[![Static Badge](https://img.shields.io/badge/Ko--Fi-72A5F2?logo=kofi)](https://ko-fi.com/fernando_gamedev)
 
 Library for doing simplified orbital mechanics calculations in real time for video games, using
 basic Keplerian orbital mechanics.
