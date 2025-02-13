@@ -134,9 +134,15 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	pub fn with_mercury(mut self) -> Self {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let mercury_handle = H::from_u16(handles::HANDLE_MERCURY).unwrap();
+		let one = T::from_f32(1.0).unwrap();
+		let two = T::from_f32(2.0).unwrap();
+		let flattening = T::from_f32(0.0009).unwrap();
+		let equator_factor = one + (flattening / two);
+		let polar_factor = one + (flattening / two);
+		let mean_radius_km = T::from_f64(2439.7).unwrap();
 		let mercury_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(3.3011e23).unwrap())
-			.with_radius_km(T::from_f64(2439.7).unwrap());
+			.with_radii_km(mean_radius_km * equator_factor, mean_radius_km * polar_factor);
 		let mercury_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(5.791e7).unwrap())
 			.with_eccentricity(T::from_f64(0.205630).unwrap())
@@ -206,7 +212,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let mars_handle = H::from_u16(handles::HANDLE_MARS).unwrap();
 		let mars_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(6.4171e23).unwrap())
-			.with_radius_km(T::from_f64(3389.5).unwrap());
+			.with_radii_km(T::from_f64(3396.2).unwrap(), T::from_f64(3376.2).unwrap());
 		let mars_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(227_939_366.0).unwrap())
 			.with_eccentricity(T::from_f64(0.0934).unwrap())
@@ -259,7 +265,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let jupiter_handle = H::from_u16(handles::HANDLE_JUPITER).unwrap();
 		let jupiter_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(1.8982e27).unwrap())
-			.with_radius_km(T::from_f64(69911.5).unwrap());
+			.with_radii_km(T::from_f64(71492.0).unwrap(), T::from_f64(66854.0).unwrap());
 		let jupiter_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_au(T::from_f64(5.2038).unwrap())
 			.with_eccentricity(T::from_f64(0.0489).unwrap())
@@ -333,10 +339,10 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		// Amalthea
 		let amalthea_handle = H::from_u16(handles::HANDLE_AMALTHEA).unwrap();
 		let amalthea_info: Body<T> = Body::default()
-			.with_mass_kg(T::from_f64(7.17e18).unwrap())
-			.with_radius_km(T::from_f64(101.000).unwrap());
+			.with_mass_kg(T::from_f64(2.08e18).unwrap())
+			.with_radius_km(T::from_f64(83.5).unwrap());
 		let amalthea_orbit: OrbitalElements<T> = OrbitalElements::default()
-			.with_semimajor_axis_m(T::from_f64(181159256.1).unwrap())
+			.with_semimajor_axis_km(T::from_f64(181365.84).unwrap())
 			.with_eccentricity(T::from_f64(0.000441428663648964).unwrap())
 			.with_inclination_deg(T::from_f64(2.55350793607894).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(414.339943282274).unwrap())
@@ -477,7 +483,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let saturn_handle = H::from_u16(handles::HANDLE_SATURN).unwrap();
 		let saturn_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(5.6834e26).unwrap())
-			.with_radius_km(T::from_f64(69911.5).unwrap());
+			.with_radii_km(T::from_f64(60268.0).unwrap(), T::from_f64(54364.0).unwrap());
 		let saturn_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_au(T::from_f64(9.5826).unwrap())
 			.with_eccentricity(T::from_f64(0.0565).unwrap())
@@ -650,7 +656,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let uranus_handle = H::from_u16(handles::HANDLE_URANUS).unwrap();
 		let uranus_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(8.6810e25).unwrap())
-			.with_radius_km(T::from_f64(25362.0).unwrap());
+			.with_radii_km(T::from_f64(25559.0).unwrap(), T::from_f64(24973.0).unwrap());
 		let uranus_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_au(T::from_f64(19.19126).unwrap())
 			.with_eccentricity(T::from_f64(0.04717).unwrap())
@@ -747,8 +753,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		// saturn
 		let neptune_handle = H::from_u16(handles::HANDLE_NEPTUNE).unwrap();
 		let neptune_info: Body<T> = Body::default()
-			.with_mass_kg(T::from_f64(5.6834e26).unwrap())
-			.with_radius_km(T::from_f64(69911.5).unwrap());
+			.with_mass_kg(T::from_f64(1.02409e26).unwrap())
+			.with_radii_km(T::from_f64(24764.0).unwrap(), T::from_f64(24341.0).unwrap());
 		let neptune_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_au(T::from_f64(30.07).unwrap())
 			.with_eccentricity(T::from_f64(0.008678).unwrap())
