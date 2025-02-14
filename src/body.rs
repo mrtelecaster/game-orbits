@@ -12,12 +12,14 @@ pub struct Body<T> {
     radius_equator_km: T,
     /// Polar radius of this body in kilometers (km)
     radius_polar_km: T,
+	/// Axial tilt of the body relative to its orbital plane
+	axial_tilt_deg: T,
 }
 impl<T> Body<T> where T: Float + FromPrimitive
 {
     /// Create a new body with the given mass and radius properties
-    pub fn new(mass_kg: T, radius_equator_km: T, radius_polar_km: T) -> Self {
-        Self{ mass_kg: mass_kg, radius_equator_km, radius_polar_km }
+    pub fn new(mass_kg: T, radius_equator_km: T, radius_polar_km: T, axial_tilt_deg: T) -> Self {
+        Self{ mass_kg: mass_kg, radius_equator_km, radius_polar_km, axial_tilt_deg }
     }
     /// Create a new body with the properties of [the planet Earth](https://en.wikipedia.org/wiki/Earth)
     pub fn new_earth() -> Self where T: FromPrimitive {
@@ -25,14 +27,17 @@ impl<T> Body<T> where T: Float + FromPrimitive
 			T::from_f64(constants::MASS_EARTH_KG).unwrap(),
 			T::from_f64(constants::RADIUS_EARTH_EQUATOR_KM).unwrap(),
 			T::from_f64(constants::RADIUS_EARTH_POLAR_KM).unwrap(),
+			T::from_f64(23.4392811).unwrap(),
 		)
     }
 	/// Create a new body with the properties of [our sun]()
 	pub fn new_sol() -> Self where T: FromPrimitive {
+		let flattening_factor = 1.0 - 0.00005;
 		Self::new(
 			T::from_f64(constants::MASS_SUN_KG).unwrap(),
 			T::from_f64(constants::RADIUS_SUN_M * constants::CONVERT_M_TO_KM).unwrap(),
-			T::from_f64(constants::RADIUS_SUN_M * constants::CONVERT_M_TO_KM).unwrap(),
+			T::from_f64(constants::RADIUS_SUN_M * constants::CONVERT_M_TO_KM * flattening_factor).unwrap(),
+			T::from_f32(0.0).unwrap(),
 		)
 	}
 	pub fn with_mass_kg(mut self, mass: T) -> Self {
@@ -53,6 +58,15 @@ impl<T> Body<T> where T: Float + FromPrimitive
 		let scale_factor = T::from_f64(constants::CONVERT_M_TO_KM).unwrap();
 		self.radius_polar_km = radius * scale_factor;
 		self.radius_equator_km = radius * scale_factor;
+		self
+	}
+	pub fn with_radii_km(mut self, equatorial: T, polar: T) -> Self {
+		self.radius_polar_km = polar;
+		self.radius_equator_km = equatorial;
+		self
+	}
+	pub fn with_axial_tilt_deg(mut self, axial_tilt: T) -> Self {
+		self.axial_tilt_deg = axial_tilt;
 		self
 	}
     /// Gets the mass of this body in kilograms, *kg*
@@ -99,7 +113,7 @@ impl<T> Body<T> where T: Float + FromPrimitive
 impl<T> Default for Body<T> where T: Float + FromPrimitive {
 	fn default() -> Self {
 		let zero = T::from_f64(0.0).unwrap();
-		Self::new(zero, zero, zero)
+		Self::new(zero, zero, zero, zero)
 	}
 }
 
