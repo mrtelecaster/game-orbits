@@ -120,7 +120,7 @@ fn setup_ui(mut commands: Commands) {
 	let control_camera_left = commands.spawn((Text::new("[A] Rotate camera left"), font.clone())).id();
 	let control_camera_right = commands.spawn((Text::new("[D] Rotate camera right"), font.clone())).id();
 	let control_zoom_in = commands.spawn((Text::new("[+] Zoom in"), font.clone())).id();
-	let control_zoom_out = commands.spawn((Text::new("[-] Zoom in"), font.clone())).id();
+	let control_zoom_out = commands.spawn((Text::new("[-] Zoom out"), font.clone())).id();
 	let control_view_orbits = commands.spawn((Text::new("[1] Change orbit visibility: All orbits"), font.clone())).id();
 	let control_view_soi = commands.spawn((Text::new("[2] Toggle SOI visibility: Visible"), font.clone())).id();
 	let control_view_apsis = commands.spawn((Text::new("[3] Toggle -apsis visibility: Visible"), font.clone())).id();
@@ -129,6 +129,7 @@ fn setup_ui(mut commands: Commands) {
 		left: Val::Px(0.0),
 		top: Val::Px(0.0),
 		flex_direction: FlexDirection::Column,
+		padding: UiRect::axes(Val::Px(6.0), Val::Px(3.0)),
 		..default()
 	}).add_child(control_camera_up).add_child(control_camera_down).add_child(control_camera_left).add_child(control_camera_right)
 		.add_child(control_zoom_in).add_child(control_zoom_out)
