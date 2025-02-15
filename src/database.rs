@@ -142,7 +142,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let mean_radius_km = T::from_f64(2439.7).unwrap();
 		let mercury_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(3.3011e23).unwrap())
-			.with_radii_km(mean_radius_km * equator_factor, mean_radius_km * polar_factor);
+			.with_radii_km(mean_radius_km * equator_factor, mean_radius_km * polar_factor)
+			.with_axial_tilt_deg(T::from_f64(0.034).unwrap());
 		let mercury_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(5.791e7).unwrap())
 			.with_eccentricity(T::from_f64(0.205630).unwrap())
@@ -161,7 +162,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let venus_handle = H::from_u16(handles::HANDLE_VENUS).unwrap();
 		let venus_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(4.8675e24).unwrap())
-			.with_radius_km(T::from_f64(6051.8).unwrap());
+			.with_radius_km(T::from_f64(6051.8).unwrap())
+			.with_axial_tilt_deg(T::from_f64(177.36).unwrap());
 		let venus_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(1.0821e8).unwrap())
 			.with_eccentricity(T::from_f64(0.006772).unwrap())
@@ -196,7 +198,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let moon_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(384_399.0).unwrap())
 			.with_eccentricity(T::from_f64(0.0549).unwrap())
-			.with_inclination_deg(T::from_f64(5.145).unwrap())
+			.with_inclination_deg(T::from_f64(-18.294).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(114.20783).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(-11.26064).unwrap());
 		let moon_entry = DatabaseEntry::new(moon_info, "Luna")
@@ -212,7 +214,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let mars_handle = H::from_u16(handles::HANDLE_MARS).unwrap();
 		let mars_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(6.4171e23).unwrap())
-			.with_radii_km(T::from_f64(3396.2).unwrap(), T::from_f64(3376.2).unwrap());
+			.with_radii_km(T::from_f64(3396.2).unwrap(), T::from_f64(3376.2).unwrap())
+			.with_axial_tilt_deg(T::from_f64(25.19).unwrap());
 		let mars_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(227_939_366.0).unwrap())
 			.with_eccentricity(T::from_f64(0.0934).unwrap())
@@ -265,7 +268,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let jupiter_handle = H::from_u16(handles::HANDLE_JUPITER).unwrap();
 		let jupiter_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(1.8982e27).unwrap())
-			.with_radii_km(T::from_f64(71492.0).unwrap(), T::from_f64(66854.0).unwrap());
+			.with_radii_km(T::from_f64(71492.0).unwrap(), T::from_f64(66854.0).unwrap())
+			.with_axial_tilt_deg(T::from_f64(3.13).unwrap());
 		let jupiter_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_au(T::from_f64(5.2038).unwrap())
 			.with_eccentricity(T::from_f64(0.0489).unwrap())
@@ -284,7 +288,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let io_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(422025278.692653).unwrap())
 			.with_eccentricity(T::from_f64(0.00418867166362767).unwrap())
-			.with_inclination_deg(T::from_f64(2.18312929).unwrap())
+			.with_inclination_deg(T::from_f64(0.05).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(654.3518983).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(737.1542087).unwrap());
 		let io_entry = DatabaseEntry::new(io_info, "Io")
@@ -299,7 +303,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let europa_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(671193628.654398).unwrap())
 			.with_eccentricity(T::from_f64(0.00940288418380329).unwrap())
-			.with_inclination_deg(T::from_f64(2.216347171).unwrap())
+			.with_inclination_deg(T::from_f64(0.47).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(468.8993005).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(350.5260572).unwrap());
 		let europa_entry = DatabaseEntry::new(europa_info, "Europa")
@@ -314,7 +318,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let ganymede_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(1070615470.44541).unwrap())
 			.with_eccentricity(T::from_f64(0.00158762974782861).unwrap())
-			.with_inclination_deg(T::from_f64(2.0381662).unwrap())
+			.with_inclination_deg(T::from_f64(0.2).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(621.291691).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(341.6959921).unwrap());
 		let ganymede_entry = DatabaseEntry::new(ganymede_info, "Ganymede")
@@ -329,7 +333,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let callisto_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(1_882_700.0).unwrap())
 			.with_eccentricity(T::from_f64(0.0074).unwrap())
-			.with_inclination_deg(T::from_f64(2.017).unwrap())
+			.with_inclination_deg(T::from_f64(0.192).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(698.8083584).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(339.4829654).unwrap());
 		let callisto_entry = DatabaseEntry::new(callisto_info, "Callisto")
@@ -344,7 +348,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let amalthea_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(181365.84).unwrap())
 			.with_eccentricity(T::from_f64(0.000441428663648964).unwrap())
-			.with_inclination_deg(T::from_f64(2.55350793607894).unwrap())
+			.with_inclination_deg(T::from_f64(0.374).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(414.339943282274).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(342.032315906764).unwrap());
 		let amalthea_entry = DatabaseEntry::new(amalthea_info, "Amalthea")
@@ -359,7 +363,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let himalia_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(11394679431.4089).unwrap())
 			.with_eccentricity(T::from_f64(0.148020288964713).unwrap())
-			.with_inclination_deg(T::from_f64(30.4865631823591).unwrap())
+			.with_inclination_deg(T::from_f64(28.1).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(405.592890277337).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(57.7865255776614).unwrap());
 		let himalia_entry = DatabaseEntry::new(himalia_info, "Himalia")
@@ -374,7 +378,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let elara_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(11724775187.5364).unwrap())
 			.with_eccentricity(T::from_f64(0.196015925266734).unwrap())
-			.with_inclination_deg(T::from_f64(29.645438545611).unwrap())
+			.with_inclination_deg(T::from_f64(27.9).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(104.680792927026).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(254.812870711218).unwrap());
 		let elara_entry = DatabaseEntry::new(elara_info, "Elara")
@@ -389,7 +393,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let pasiphae_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(23398199225.7693).unwrap())
 			.with_eccentricity(T::from_f64(0.36953258321634).unwrap())
-			.with_inclination_deg(T::from_f64(141.719099777028).unwrap())
+			.with_inclination_deg(T::from_f64(148.4).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(333.722656460893).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(529.781057110863).unwrap());
 		let pasiphae_entry = DatabaseEntry::new(pasiphae_info, "Pasiphae")
@@ -404,7 +408,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let sinope_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(23731586385.2044).unwrap())
 			.with_eccentricity(T::from_f64(0.286212248401311).unwrap())
-			.with_inclination_deg(T::from_f64(153.516632270518).unwrap())
+			.with_inclination_deg(T::from_f64(157.3).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(326.138400070621).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(330.01471478535).unwrap());
 		let sinope_entry = DatabaseEntry::new(sinope_info, "Sinope")
@@ -419,7 +423,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let lysithea_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(11681680564.3821).unwrap())
 			.with_eccentricity(T::from_f64(0.133982901517185).unwrap())
-			.with_inclination_deg(T::from_f64(27.1161743142435).unwrap())
+			.with_inclination_deg(T::from_f64(27.2).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(1.25211821789787).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(64.8726214272199).unwrap());
 		let lysithea_entry = DatabaseEntry::new(lysithea_info, "Lysithea")
@@ -434,7 +438,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let carme_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(22846253568.9564).unwrap())
 			.with_eccentricity(T::from_f64(0.222748653886903).unwrap())
-			.with_inclination_deg(T::from_f64(164.964353121975).unwrap())
+			.with_inclination_deg(T::from_f64(164.3).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(143.056427256701).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(199.239805499578).unwrap());
 		let carme_entry = DatabaseEntry::new(carme_info, "Carma")
@@ -449,7 +453,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let ananke_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(21178519961.0608).unwrap())
 			.with_eccentricity(T::from_f64(0.360749649973783).unwrap())
-			.with_inclination_deg(T::from_f64(151.631855563574).unwrap())
+			.with_inclination_deg(T::from_f64(147.6).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(39.1941066220987).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(131.881909593109).unwrap());
 		let ananke_entry = DatabaseEntry::new(ananke_info, "Ananke")
@@ -464,7 +468,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let leda_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(11_195_980.0).unwrap())
 			.with_eccentricity(T::from_f64(0.360749649973783).unwrap())
-			.with_inclination_deg(T::from_f64(27.63631).unwrap())
+			.with_inclination_deg(T::from_f64(28.6).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(190.18497).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(312.92965).unwrap());
 		let leda_entry = DatabaseEntry::new(leda_info, "Leda")
@@ -483,7 +487,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let saturn_handle = H::from_u16(handles::HANDLE_SATURN).unwrap();
 		let saturn_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(5.6834e26).unwrap())
-			.with_radii_km(T::from_f64(60268.0).unwrap(), T::from_f64(54364.0).unwrap());
+			.with_radii_km(T::from_f64(60268.0).unwrap(), T::from_f64(54364.0).unwrap())
+			.with_axial_tilt_deg(T::from_f64(26.73).unwrap());
 		let saturn_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_au(T::from_f64(9.5826).unwrap())
 			.with_eccentricity(T::from_f64(0.0565).unwrap())
@@ -502,7 +507,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let mimas_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(186037830.154953).unwrap())
 			.with_eccentricity(T::from_f64(0.0215133482144328).unwrap())
-			.with_inclination_deg(T::from_f64(29.18891093).unwrap())
+			.with_inclination_deg(T::from_f64(1.6).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.3070822).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(449.3704298).unwrap());
 		let mimas_entry = DatabaseEntry::new(mimas_info, "Mimas")
@@ -517,7 +522,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let enceladus_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(238408052.167797).unwrap())
 			.with_eccentricity(T::from_f64(0.000372459385461708).unwrap())
-			.with_inclination_deg(T::from_f64(28.04279097).unwrap())
+			.with_inclination_deg(T::from_f64(0.0).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(169.5204865).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(264.6781976).unwrap());
 		let enceladus_entry = DatabaseEntry::new(enceladus_info, "Enceladus")
@@ -532,7 +537,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let tethys_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(294982634.56239).unwrap())
 			.with_eccentricity(T::from_f64(0.00107532665445937).unwrap())
-			.with_inclination_deg(T::from_f64(26.97242049).unwrap())
+			.with_inclination_deg(T::from_f64(1.1).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(169.1532561).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(496.8246271).unwrap());
 		let tethys_entry = DatabaseEntry::new(tethys_info, "Tethys")
@@ -547,7 +552,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let dione_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(377653774.68302).unwrap())
 			.with_eccentricity(T::from_f64(0.00273184023667722).unwrap())
-			.with_inclination_deg(T::from_f64(28.05084794).unwrap())
+			.with_inclination_deg(T::from_f64(0.0).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(169.5723087).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(5080.2590124).unwrap());
 		let dione_entry = DatabaseEntry::new(dione_info, "Dione")
@@ -562,7 +567,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let rhea_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(527225476.502164).unwrap())
 			.with_eccentricity(T::from_f64(0.000909561682184622).unwrap())
-			.with_inclination_deg(T::from_f64(27.94971857).unwrap())
+			.with_inclination_deg(T::from_f64(0.3).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(168.8079837).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(360.9692475).unwrap());
 		let rhea_entry = DatabaseEntry::new(rhea_info, "Rhea")
@@ -577,7 +582,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let titan_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(1221971852.3956).unwrap())
 			.with_eccentricity(T::from_f64(0.0286455635677465).unwrap())
-			.with_inclination_deg(T::from_f64(27.71621075).unwrap())
+			.with_inclination_deg(T::from_f64(0.3).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(169.1427802).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(336.2491384).unwrap());
 		let titan_entry = DatabaseEntry::new(titan_info, "Titan")
@@ -592,7 +597,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let hyperion_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(1447200000.0).unwrap())
 			.with_eccentricity(T::from_f64(0.0757).unwrap())
-			.with_inclination_deg(T::from_f64(27.0344979012323).unwrap())
+			.with_inclination_deg(T::from_f64(0.6).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(168.9).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(182.895).unwrap());
 		let hyperion_entry = DatabaseEntry::new(hyperion_info, "Hyperion")
@@ -607,7 +612,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let iapetus_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(3563513670.80278).unwrap())
 			.with_eccentricity(T::from_f64(0.0274067153032204).unwrap())
-			.with_inclination_deg(T::from_f64(17.25375588).unwrap())
+			.with_inclination_deg(T::from_f64(7.6).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(139.3182554).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(369.2974058).unwrap());
 		let iapetus_entry = DatabaseEntry::new(iapetus_info, "Iapetus")
@@ -622,7 +627,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let phoebe_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(12995759988.095).unwrap())
 			.with_eccentricity(T::from_f64(0.0000156144511577606).unwrap())
-			.with_inclination_deg(T::from_f64(0.0151781240198135).unwrap())
+			.with_inclination_deg(T::from_f64(175.2).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
 		let phoebe_entry = DatabaseEntry::new(phoebe_info, "Phoebe")
@@ -637,7 +642,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let janus_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(151460988.095).unwrap())
 			.with_eccentricity(T::from_f64(0.0000000144511577606).unwrap())
-			.with_inclination_deg(T::from_f64(0.000007105811891727).unwrap())
+			.with_inclination_deg(T::from_f64(0.2).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
 		let janus_entry = DatabaseEntry::new(janus_info, "Janus")
@@ -656,7 +661,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let uranus_handle = H::from_u16(handles::HANDLE_URANUS).unwrap();
 		let uranus_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(8.6810e25).unwrap())
-			.with_radii_km(T::from_f64(25559.0).unwrap(), T::from_f64(24973.0).unwrap());
+			.with_radii_km(T::from_f64(25559.0).unwrap(), T::from_f64(24973.0).unwrap())
+			.with_axial_tilt_deg(T::from_f64(97.77).unwrap());
 		let uranus_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_au(T::from_f64(19.19126).unwrap())
 			.with_eccentricity(T::from_f64(0.04717).unwrap())
@@ -675,7 +681,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let ariel_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(190940711.743871).unwrap())
 			.with_eccentricity(T::from_f64(0.00137850353892181).unwrap())
-			.with_inclination_deg(T::from_f64(97.79230874).unwrap())
+			.with_inclination_deg(T::from_f64(0.0167).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.6951854).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(236.6892802).unwrap());
 		let ariel_entry = DatabaseEntry::new(ariel_info, "Ariel")
@@ -690,7 +696,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let umbriel_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(266004056.284577).unwrap())
 			.with_eccentricity(T::from_f64(0.00436450298644918).unwrap())
-			.with_inclination_deg(T::from_f64(97.682239322).unwrap())
+			.with_inclination_deg(T::from_f64(0.0796).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.7113413).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(521.5502336).unwrap());
 		let umbriel_entry = DatabaseEntry::new(umbriel_info, "Umbriel")
@@ -705,7 +711,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let titania_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(436347342.837041).unwrap())
 			.with_eccentricity(T::from_f64(0.00275764018002836).unwrap())
-			.with_inclination_deg(T::from_f64(97.78930872).unwrap())
+			.with_inclination_deg(T::from_f64(0.1129).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.6116584).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(399.5640193).unwrap());
 		let titania_entry = DatabaseEntry::new(titania_info, "Titania")
@@ -720,7 +726,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let oberon_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(583560909.561177).unwrap())
 			.with_eccentricity(T::from_f64(0.00110658045344143).unwrap())
-			.with_inclination_deg(T::from_f64(97.87882122).unwrap())
+			.with_inclination_deg(T::from_f64(0.1478).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(167.7422432).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(288.925047).unwrap());
 		let oberon_entry = DatabaseEntry::new(oberon_info, "Oberon")
@@ -735,7 +741,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let miranda_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(129.87e6).unwrap())
 			.with_eccentricity(T::from_f64(0.0014).unwrap())
-			.with_inclination_deg(T::from_f64(96.44799101).unwrap())
+			.with_inclination_deg(T::from_f64(4.4072).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(163.4949965).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(242.2809905).unwrap());
 		let miranda_entry = DatabaseEntry::new(miranda_info, "Miranda")
@@ -754,7 +760,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let neptune_handle = H::from_u16(handles::HANDLE_NEPTUNE).unwrap();
 		let neptune_info: Body<T> = Body::default()
 			.with_mass_kg(T::from_f64(1.02409e26).unwrap())
-			.with_radii_km(T::from_f64(24764.0).unwrap(), T::from_f64(24341.0).unwrap());
+			.with_radii_km(T::from_f64(24764.0).unwrap(), T::from_f64(24341.0).unwrap())
+			.with_axial_tilt_deg(T::from_f64(28.32).unwrap());
 		let neptune_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_au(T::from_f64(30.07).unwrap())
 			.with_eccentricity(T::from_f64(0.008678).unwrap())
@@ -773,7 +780,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let triton_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(354765668.747018).unwrap())
 			.with_eccentricity(T::from_f64(0.0000177503155008841).unwrap())
-			.with_inclination_deg(T::from_f64(129.9699061).unwrap())
+			.with_inclination_deg(T::from_f64(156.865).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(217.2530657).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(521.6797862 - 360.0).unwrap());
 		let triton_entry = DatabaseEntry::new(triton_info, "Triton")
@@ -788,7 +795,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let nereid_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_m(T::from_f64(5515375933.0092).unwrap())
 			.with_eccentricity(T::from_f64(0.747077257017379).unwrap())
-			.with_inclination_deg(T::from_f64(5.0672309310494).unwrap())
+			.with_inclination_deg(T::from_f64(5.1).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(320.104934616101).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(616.561942032962 - 360.0).unwrap());
 		let nereid_entry = DatabaseEntry::new(nereid_info, "Nereid")
@@ -803,7 +810,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let naiad_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(48227784.2).unwrap())
 			.with_eccentricity(T::from_f64(0.000000447511577606).unwrap())
-			.with_inclination_deg(T::from_f64(0.0272397898144598).unwrap())
+			.with_inclination_deg(T::from_f64(4.691).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
 		let naiad_entry = DatabaseEntry::new(naiad_info, "Naiad")
@@ -818,7 +825,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let thalassa_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(50141475.7560609).unwrap())
 			.with_eccentricity(T::from_f64(0.001370609133743).unwrap())
-			.with_inclination_deg(T::from_f64(28.635825609126).unwrap())
+			.with_inclination_deg(T::from_f64(0.135).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(49.1486489463042).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(178.660268240832).unwrap());
 		let thalassa_entry = DatabaseEntry::new(thalassa_info, "Thalassa")
@@ -833,7 +840,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let despina_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(60227784.2).unwrap())
 			.with_eccentricity(T::from_f64(0.0000000244511577606).unwrap())
-			.with_inclination_deg(T::from_f64(0.001238965071423).unwrap())
+			.with_inclination_deg(T::from_f64(0.068).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(208.626701831817).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(104.242486953736).unwrap());
 		let despina_entry = DatabaseEntry::new(despina_info, "Despina")
@@ -848,7 +855,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let galatea_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(62097694.895992).unwrap())
 			.with_eccentricity(T::from_f64(0.00176342814065272).unwrap())
-			.with_inclination_deg(T::from_f64(28.5712798372164).unwrap())
+			.with_inclination_deg(T::from_f64(0.034).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(48.6938364381423).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(188.29717200708).unwrap());
 		let galatea_entry = DatabaseEntry::new(galatea_info, "Galatea")
@@ -863,7 +870,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let larissa_orbit: OrbitalElements<T> = OrbitalElements::default()
 			.with_semimajor_axis_km(T::from_f64(73591064.2683372).unwrap())
 			.with_eccentricity(T::from_f64(0.001696576604903).unwrap())
-			.with_inclination_deg(T::from_f64(28.3531487332235).unwrap())
+			.with_inclination_deg(T::from_f64(0.205).unwrap())
 			.with_long_of_ascending_node_deg(T::from_f64(48.9078558843833).unwrap())
 			.with_arg_of_periapsis_deg(T::from_f64(378.844329275267).unwrap());
 		let larissa_entry = DatabaseEntry::new(larissa_info, "Larissa")
@@ -966,17 +973,22 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let zero = T::from_f32(0.0).unwrap();
 		let one = T::from_f32(1.0).unwrap();
 		let two = T::from_f32(2.0).unwrap();
+		let x_axis = Vector3::new(one, zero, zero);
+		let y_axis = Vector3::new(zero, one, zero);
 		let orbiting_body = self.bodies.get(&handle).unwrap();
 		if let Some(orbit) = &orbiting_body.orbit {
+			let parent = self.get_entry(&orbiting_body.parent.clone().unwrap());
+			let parent_axis_rot: Rotation3<T> = Rotation3::new(x_axis * parent.info.axial_tilt_rad());
+			let parent_up: Vector3<T> = parent_axis_rot * y_axis;
 			let true_anomaly = mean_anomaly + two * orbit.eccentricity * Float::sin(mean_anomaly) + T::from_f64(1.25).unwrap() * Float::powi(orbit.eccentricity, 2) * Float::sin(two * mean_anomaly);
 			let radius = orbit.semimajor_axis * (one - Float::powi(orbit.eccentricity, 2)) / (one + orbit.eccentricity * Float::cos(true_anomaly));
-			let rot_true_anomaly = Rotation3::new(Vector3::new(zero, one, zero) * true_anomaly);
-			let rot_long_of_ascending_node = Rotation3::new(Vector3::new(zero, one, zero) * orbit.long_of_ascending_node);
-			let dir_ascending_node = rot_long_of_ascending_node * Vector3::new(one, zero, zero);
-			let dir_normal = Vector3::new(one, zero, zero).cross(&dir_ascending_node);
+			let rot_true_anomaly = Rotation3::new(parent_up * true_anomaly);
+			let rot_long_of_ascending_node = Rotation3::new(parent_up * orbit.long_of_ascending_node);
+			let dir_ascending_node = rot_long_of_ascending_node * x_axis;
+			let dir_normal = x_axis.cross(&dir_ascending_node);
 			let rot_inclination = Rotation3::new(dir_ascending_node * orbit.inclination);
 			let rot_arg_of_periapsis = Rotation3::new(dir_normal * orbit.arg_of_periapsis);
-			let direction = rot_inclination * rot_arg_of_periapsis * rot_true_anomaly * Vector3::new(one, zero, zero);
+			let direction = rot_inclination * rot_arg_of_periapsis * rot_true_anomaly * x_axis;
 			return direction * radius;
 		} else {
 			return Vector3::new(zero, zero, zero);

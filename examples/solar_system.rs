@@ -445,12 +445,14 @@ fn draw_planets(mut gizmos: Gizmos, db: Res<Database>, camera_parents: Query<&Ca
 	let camera_parent = camera_parents.single();
 	let centered_body = camera_parent.centered_body;
 	for (handle, entry) in db.iter() {
-		let pos = db.relative_position(&centered_body, handle).unwrap() * SCALE;
-		let soi_radius = db.radius_soi(handle);
 		let info = entry.info.clone();
+		let pos = db.relative_position(&centered_body, handle).unwrap() * SCALE;
+		let rot = Quat::from_axis_angle(Vec3::X, info.axial_tilt_rad());
+		let iso = Isometry3d::new(pos, rot);
 		// info!("Scale radius: {} units", info.radius_avg_km() * scale);
-		gizmos.sphere(pos, info.radius_avg_m() * SCALE, PLANET_COLOR);
+		gizmos.sphere(iso, info.radius_avg_m() * SCALE, PLANET_COLOR);
 		if camera_parent.view_soi {
+			let soi_radius = db.radius_soi(handle);
 			gizmos.sphere(pos, soi_radius * SCALE, SOI_COLOR); // sphere of influence
 		}
 	}
