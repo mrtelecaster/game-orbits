@@ -24,6 +24,7 @@ const CAM_CENTERED_ON_DEFAULT: usize = HANDLE_EARTH as usize;
 const CHANGE_VIEW_ORBITS: KeyCode = KeyCode::Digit1;
 const TOGGLE_VIEW_SOI: KeyCode = KeyCode::Digit2;
 const TOGGLE_VIEW_APSIS: KeyCode = KeyCode::Digit3;
+const TOGGLE_VIEW_AXES: KeyCode = KeyCode::Digit4;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
@@ -33,6 +34,8 @@ const PLANET_COLOR: Color = Color::srgb(1.0, 0.1, 0.5);
 const SOI_COLOR: Color = Color::srgb(1.0, 1.0, 1.0);
 const APSIS_SIZE_MIN: f32 = 0.01;
 const APSIS_SIZE_MAX: f32 = 2000.0;
+const AXIS_SIZE_MIN: f32 = 0.4;
+const AXIS_SIZE_MAX: f32 = 20000.0;
 
 type Database = BevyPlanetDatabase<usize>;
 
@@ -69,6 +72,7 @@ struct UiElements {
 	control_view_orbits: Entity,
 	control_view_soi: Entity,
 	control_view_apsis: Entity,
+	control_view_axes: Entity,
 }
 
 #[derive(Component)]
@@ -79,6 +83,7 @@ struct CameraParent {
 	pub zoom: f32,
 	pub view_apsis: bool,
 	pub view_soi: bool,
+	pub view_axes: bool,
 	pub view_orbit: OrbitViewMode
 }
 impl CameraParent {
@@ -89,7 +94,7 @@ impl CameraParent {
 }
 impl Default for CameraParent {
 	fn default() -> Self {
-		Self{ yaw: 0.0, pitch: 0.0, zoom: 0.1, centered_body: 0, view_apsis: false, view_soi: true, view_orbit: OrbitViewMode::All }
+		Self{ yaw: 0.0, pitch: 0.0, zoom: 0.1, centered_body: 0, view_apsis: false, view_soi: true, view_axes: false, view_orbit: OrbitViewMode::All }
 	}
 }
 
@@ -124,6 +129,7 @@ fn setup_ui(mut commands: Commands) {
 	let control_view_orbits = commands.spawn((Text::new("[1] Change orbit visibility: All orbits"), font.clone())).id();
 	let control_view_soi = commands.spawn((Text::new("[2] Toggle SOI visibility: Visible"), font.clone())).id();
 	let control_view_apsis = commands.spawn((Text::new("[3] Toggle -apsis visibility: Visible"), font.clone())).id();
+	let control_view_axes = commands.spawn((Text::new("[4] Toggle axis visibility: Visible"), font.clone())).id();
 	let _controls_container = commands.spawn(Node{
 		position_type: PositionType::Absolute,
 		left: Val::Px(0.0),
@@ -133,7 +139,7 @@ fn setup_ui(mut commands: Commands) {
 		..default()
 	}).add_child(control_camera_up).add_child(control_camera_down).add_child(control_camera_left).add_child(control_camera_right)
 		.add_child(control_zoom_in).add_child(control_zoom_out)
-		.add_child(control_view_orbits).add_child(control_view_soi).add_child(control_view_apsis)
+		.add_child(control_view_orbits).add_child(control_view_soi).add_child(control_view_apsis).add_child(control_view_axes)
 		.id();
 	// navigation text
 	let text_alpha = 0.4;
@@ -186,6 +192,7 @@ fn setup_ui(mut commands: Commands) {
 		control_view_orbits,
 		control_view_soi,
 		control_view_apsis,
+		control_view_axes,
 	});
 }
 
@@ -209,6 +216,12 @@ fn update_controls_ui(
 		false => "Hidden",
 	};
 	text.0 = format!("[3] Toggle -apsis visibility: {}", visibility_str);
+	let visibility_str = match camera_parent.view_axes {
+		true => "Visible",
+		false => "Hidden",
+	};
+	text = elements.get_mut(handles.control_view_axes).unwrap();
+	text.0 = format!("[4] Toggle axis visibility: {}", visibility_str);
 }
 
 fn update_planet_focus_ui(
@@ -366,6 +379,9 @@ fn process_visibility_input(
 	if keyboard.just_pressed(CHANGE_VIEW_ORBITS) {
 		camera_parent.view_orbit = camera_parent.view_orbit.next();
 	}
+	if keyboard.just_pressed(TOGGLE_VIEW_AXES) {
+		camera_parent.view_axes = !camera_parent.view_axes;
+	}
 }
 
 fn update_camera_position(
@@ -446,13 +462,19 @@ fn draw_planets(mut gizmos: Gizmos, db: Res<Database>, camera_parents: Query<&Ca
 	let camera_parent = camera_parents.single();
 	let centered_body = camera_parent.centered_body;
 	for (handle, entry) in db.iter() {
-		let pos = db.relative_position(&centered_body, handle).unwrap() * SCALE;
-		let soi_radius = db.radius_soi(handle);
 		let info = entry.info.clone();
+		let pos = db.relative_position(&centered_body, handle).unwrap() * SCALE;
+		let rot = Quat::from_axis_angle(Vec3::X, info.axial_tilt_rad());
+		let iso = Isometry3d::new(pos, rot);
 		// info!("Scale radius: {} units", info.radius_avg_km() * scale);
-		gizmos.sphere(pos, info.radius_avg_m() * SCALE, PLANET_COLOR);
+		gizmos.sphere(iso, info.radius_avg_m() * SCALE, PLANET_COLOR);
 		if camera_parent.view_soi {
+			let soi_radius = db.radius_soi(handle);
 			gizmos.sphere(pos, soi_radius * SCALE, SOI_COLOR); // sphere of influence
+		}
+		if camera_parent.view_axes {
+			let axis_size = AXIS_SIZE_MIN.lerp(AXIS_SIZE_MAX, camera_parent.zoom.powi(3));
+			gizmos.axes(iso, axis_size);
 		}
 	}
 }

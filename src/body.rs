@@ -109,6 +109,10 @@ impl<T> Body<T> where T: Float + FromPrimitive
 		let g = T::from_f64(constants::CONST_G).unwrap();
 		(g * self.mass_kg) / distance.powi(2)
 	}
+	/// Returns this body's axial tilt in radians
+	pub fn axial_tilt_rad(&self) -> T {
+		self.axial_tilt_deg * T::from_f64(constants::CONVERT_DEG_TO_RAD).unwrap()
+	}
 }
 impl<T> Default for Body<T> where T: Float + FromPrimitive {
 	fn default() -> Self {
