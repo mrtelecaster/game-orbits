@@ -1,4 +1,9 @@
-use godot::{prelude::*, builtin::Vector3, classes::{INode3D, Node3D}};
+//! Optional structures for Godot integration
+//! 
+//! [Godot-Rust book](https://godot-rust.github.io/book/)
+
+use godot::{prelude::*, builtin::Vector3, classes::{INode, Node}};
+use crate::Database;
 
 pub struct OrbitExtension;
 
@@ -6,21 +11,27 @@ pub struct OrbitExtension;
 unsafe impl ExtensionLibrary for OrbitExtension {}
 
 
+fn vec_nalgebra_to_godot(input: nalgebra::Vector3<f32>) -> godot::builtin::Vector3 {
+	godot::builtin::Vector3::new(input.x, input.y, input.z)
+}
+
 #[derive(GodotClass)]
-#[class(base=Node3D)]
-struct TestBody {
-	spin_speed: f64,
-	base: Base<Node3D>,
+#[class(base=Node)]
+pub struct GodotPlanetDatabase {
+	database: Database<i64, f32>,
 }
 #[godot_api]
-impl INode3D for TestBody {
-	fn init(base: Base<Node3D>) -> Self {
-		godot_print!("Initializing test orbital body");
-		Self{ spin_speed: 1.0, base }
+impl INode for GodotPlanetDatabase {
+	fn init(_base: Base<Node>) -> Self {
+		Self{ database: Database::default() }
 	}
-
-	fn physics_process(&mut self, delta: f64) {
-		let rotation = (self.spin_speed * delta) as f32;
-		self.base_mut().rotate(Vector3::UP, rotation);
+}
+#[godot_api]
+impl GodotPlanetDatabase {
+	pub fn relative_position(&self, origin: i64, relative: i64) -> Vector3 {
+		vec_nalgebra_to_godot(self.database.relative_position(&origin, &relative).unwrap())
+	}
+	pub fn radius_soi(&self, handle: i64) -> f32 {
+		self.database.radius_soi(&handle)
 	}
 }
