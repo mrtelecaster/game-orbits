@@ -28,9 +28,11 @@ impl INode for GodotPlanetDatabase {
 }
 #[godot_api]
 impl GodotPlanetDatabase {
+	#[func]
 	pub fn relative_position(&self, origin: i64, relative: i64) -> Vector3 {
 		vec_nalgebra_to_godot(self.database.relative_position(&origin, &relative).unwrap())
 	}
+	#[func]
 	pub fn radius_soi(&self, handle: i64) -> f32 {
 		self.database.radius_soi(&handle)
 	}
