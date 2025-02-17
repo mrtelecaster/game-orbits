@@ -110,11 +110,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	/// life, especially with moons of giant planets. This will be corrected eventually but for now
 	/// it's enough that the planets have eccentrity and inclination at all, that are authentic to
 	/// real life even if they're not strictly perfectly accurate.
-	pub fn with_solar_system(self) -> Self {
-		self.with_sol()
-			.with_mercury()
+	pub fn with_solar_system(mut self) -> Self {
+		self.add_sol();
+		self.add_earth();
+		self.with_mercury()
 			.with_venus()
-			.with_earth()
 			.with_mars()
 			.with_jupiter()
 			.with_saturn()
@@ -123,12 +123,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_dwarf_planets()
 	}
 	/// Adds our sun to the database
-	pub fn with_sol(mut self) -> Self {
+	pub fn add_sol(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let sun_info: Body<T> = Body::new_sol();
 		let sun_entry = DatabaseEntry::new(sun_info, "Sol").with_scale(T::from_f64(1.0 / 100_000_000.0).unwrap());
 		self.add_entry(sun_handle.clone(), sun_entry);
-		self
 	}
 	/// Adds the planet mercury to the database
 	pub fn with_mercury(mut self) -> Self {
@@ -175,7 +174,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		self
 	}
 	/// Adds the Earth and its moon to the database
-	pub fn with_earth(mut self) -> Self {
+	pub fn add_earth(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let earth_handle = H::from_u16(handles::HANDLE_EARTH).unwrap();
 		let earth_info: Body<T> = Body::new_earth();
@@ -203,7 +202,6 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(earth_handle.clone(), moon_orbit)
 			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
 		self.add_entry(moon_handle, moon_entry);
-		self
 	}
 	/// Adds the planet Mars and its two moons to the database
 	pub fn with_mars(mut self) -> Self {

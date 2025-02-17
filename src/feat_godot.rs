@@ -29,6 +29,10 @@ impl INode for GodotPlanetDatabase {
 #[godot_api]
 impl GodotPlanetDatabase {
 	#[func]
+	pub fn add_solar_system(&mut self) {
+		self.database.add_sol();
+	}
+	#[func]
 	pub fn relative_position(&self, origin: i64, relative: i64) -> Vector3 {
 		vec_nalgebra_to_godot(self.database.relative_position(&origin, &relative).unwrap())
 	}
