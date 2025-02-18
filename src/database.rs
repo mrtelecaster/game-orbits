@@ -10,8 +10,7 @@ use crate::{constants::f64::CONVERT_DEG_TO_RAD, Body, OrbitalElements};
 #[cfg(feature="bevy")]
 use bevy::prelude::*;
 
-pub mod handles
-{
+pub mod handles {
 	pub const HANDLE_SOL: u16 = 0;
 	pub const HANDLE_MERCURY: u16 = 1;
 	pub const HANDLE_VENUS: u16 = 2;
@@ -968,7 +967,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	pub fn get_entry(&self, handle: &H) -> &DatabaseEntry<H, T> {
 		self.bodies.get(handle).unwrap()
 	}
-	/// Gets the position of the given body at the given mean anomaly value
+	/// Gets the position of the given body at the given time since epoch in seconds
 	pub fn position_at_mean_anomaly(&self, handle: &H, mean_anomaly: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
 		let zero = T::from_f32(0.0).unwrap();
 		let one = T::from_f32(1.0).unwrap();
@@ -994,7 +993,17 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			return Vector3::new(zero, zero, zero);
 		}
 	}
-	pub fn relative_position(&self, origin: &H, relative: &H) -> Option<Vector3<T>> where H: Debug + Display + Ord, T: RealField + SimdValue + SimdRealField {
+	pub fn position_at_time(&self, handle: &H, time: T) -> Vector3<T> where T: RealField {
+		let orbiting_body = self.bodies.get(handle).unwrap();
+		if orbiting_body.orbit.is_some() {
+			let mean_anomaly = self.mean_anomaly_at_time(handle, time);
+			return self.position_at_mean_anomaly(handle, mean_anomaly);
+		} else {
+			let zero = T::from_f32(0.0).unwrap();
+			return Vector3::new(zero, zero, zero);
+		}
+	}
+	pub fn relative_position(&self, origin: &H, relative: &H, time: T) -> Option<Vector3<T>> where H: Debug + Display + Ord, T: RealField + SimdValue + SimdRealField {
 		// println!("Finding relative position between origin body {} and relative body {}", origin, relative);
 		let relative_heirarchy: Vec<H> = self.get_parents(relative);
 		// println!("Relative heirarchy: {:?}", relative_heirarchy);
@@ -1002,7 +1011,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		let mut relative_position = Vector3::new(zero, zero, zero);
 		let mut entry = self.get_entry(origin);
 		// println!("\tSubtracting orbital position of {}", origin);
-		relative_position -= self.position_at_mean_anomaly(origin, entry.mean_anomaly_at_epoch);
+		relative_position -= self.position_at_time(origin, time);
 		// if origin body is already in the parent heirarchy of the relative body, find the relative body position
 		if let Ok(parent_relative_index) = relative_heirarchy.binary_search(origin) {
 			// println!("Reached heirarchy intersection at body {}", parent_handle);
@@ -1012,7 +1021,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 				handle = &relative_heirarchy[index];
 				entry = self.get_entry(handle);
 				// println!("\tAdding orbital position of {}", handle);
-				relative_position += self.position_at_mean_anomaly(handle, entry.mean_anomaly_at_epoch);
+				relative_position += self.position_at_time(handle, time);
 				// println!("Checking if body at index {} ({}) is the relative body {}", index, handle, relative);
 				if handle == relative {
 					return Some(relative_position);
@@ -1025,7 +1034,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		while let Some(parent_handle) = &entry.parent {
 			entry = self.get_entry(parent_handle);
 			// println!("\tSubtracting orbital position of {}", parent_handle);
-			relative_position -= self.position_at_mean_anomaly(parent_handle, entry.mean_anomaly_at_epoch);
+			relative_position -= self.position_at_time(parent_handle, time);
 			// if the heirarchy of the relative body contains this body, start summing the orbits in that heirarchy
 			if let Ok(parent_relative_index) = relative_heirarchy.binary_search(&parent_handle) {
 				// println!("Reached heirarchy intersection at body {}", parent_handle);
@@ -1035,7 +1044,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 					handle = &relative_heirarchy[index];
 					entry = self.get_entry(handle);
 					// println!("\tAdding orbital position of {}", handle);
-					relative_position += self.position_at_mean_anomaly(handle, entry.mean_anomaly_at_epoch);
+					relative_position += self.position_at_time(handle, time);
 					// println!("Checking if body at index {} ({}) is the relative body {}", index, handle, relative);
 					if handle == relative {
 						return Some(relative_position);
@@ -1051,12 +1060,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	pub fn absolute_position_at_time(&self, handle: &H, time: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
 		let zero = T::from_f32(0.0).unwrap();
 		if let Some(entry) = self.bodies.get(&handle) {
-			let mean_anomaly = entry.mean_anomaly_at_epoch;
 			let parent_position = match &entry.parent {
 				Some(parent_handle) => self.absolute_position_at_time(parent_handle, time),
 				None => Vector3::new(zero, zero, zero),
 			};
-			return self.position_at_mean_anomaly(handle, mean_anomaly) + parent_position;
+			return self.position_at_time(handle, time) + parent_position;
 		} else {
 			return Vector3::new(zero, zero, zero);
 		}
@@ -1109,6 +1117,18 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			return orbiting_body_info.distance_of_gravity(minimum_gravity);
 		}
 	}
+	pub fn mean_anomaly_at_time(&self, handle: &H, time: T) -> T {
+		let orbiting_entry = self.get_entry(handle);
+		if let Some(parent_handle) = &orbiting_entry.parent {
+			let orbit = orbiting_entry.orbit.clone().unwrap();
+			let parent_entry = self.get_entry(parent_handle);
+			let n = Float::sqrt(parent_entry.gm() / Float::powi(orbit.semimajor_axis, 3));
+			let mean_anomaly = orbiting_entry.mean_anomaly_at_epoch + n * time; 
+			return mean_anomaly;
+		} else {
+			return T::from_f32(0.0).unwrap();
+		}
+	}
 	pub fn iter(&self) -> Iter<'_, H, DatabaseEntry<H, T>> {
 		self.bodies.iter()
 	}
@@ -1152,6 +1172,9 @@ impl<H, T> DatabaseEntry<H, T> where T: Float + FromPrimitive + SubAssign {
 			self.mean_anomaly_at_epoch -= circle;
 		}
 		self
+	}
+	pub fn gm(&self) -> T {
+		self.info.gm()
 	}
 }
 

@@ -25,6 +25,9 @@ const CHANGE_VIEW_ORBITS: KeyCode = KeyCode::Digit1;
 const TOGGLE_VIEW_SOI: KeyCode = KeyCode::Digit2;
 const TOGGLE_VIEW_APSIS: KeyCode = KeyCode::Digit3;
 const TOGGLE_VIEW_AXES: KeyCode = KeyCode::Digit4;
+const INCREASE_TIME: KeyCode = KeyCode::Period;
+const DECREASE_TIME: KeyCode = KeyCode::Comma;
+const TIME_CHANGE_SPEED: f32 = 2000.0;
 
 const ORBIT_SEGMENTS: usize = 100;
 const ORBIT_COLOR: Color = Color::srgb(0.5, 1.0, 0.0);
@@ -73,6 +76,18 @@ struct UiElements {
 	control_view_soi: Entity,
 	control_view_apsis: Entity,
 	control_view_axes: Entity,
+	time_display: Entity,
+}
+
+/// Stores the solar system time, allowing it to be changed at runtime
+#[derive(Resource)]
+struct SystemTime {
+	pub seconds: f32,
+}
+impl Default for SystemTime {
+	fn default() -> Self {
+		Self{ seconds: 0.0 }
+	}
 }
 
 #[derive(Component)]
@@ -120,8 +135,9 @@ fn setup_ui(mut commands: Commands) {
 		font_size: 14.0,
 		..default()
 	};
-	let control_camera_up = commands.spawn((Text::new("[W][A][S][D] Rotate view"), font.clone())).id();
-	let control_zoom_in = commands.spawn((Text::new("[+][-] Zoom in/out"), font.clone())).id();
+	let control_camera = commands.spawn((Text::new("[W][A][S][D] Rotate view"), font.clone())).id();
+	let control_zoom = commands.spawn((Text::new("[+][-] Zoom in/out"), font.clone())).id();
+	let control_time = commands.spawn((Text::new("[<][>] increase/decrease time"), font.clone())).id();
 	let control_view_orbits = commands.spawn((Text::new("[1] Change orbit visibility: All orbits"), font.clone())).id();
 	let control_view_soi = commands.spawn((Text::new("[2] Toggle SOI visibility: Visible"), font.clone())).id();
 	let control_view_apsis = commands.spawn((Text::new("[3] Toggle -apsis visibility: Visible"), font.clone())).id();
@@ -133,7 +149,7 @@ fn setup_ui(mut commands: Commands) {
 		flex_direction: FlexDirection::Column,
 		padding: UiRect::axes(Val::Px(5.0), Val::Px(4.0)),
 		..default()
-	}).add_child(control_camera_up).add_child(control_zoom_in)
+	}).add_child(control_camera).add_child(control_zoom).add_child(control_time)
 		.add_child(control_view_orbits).add_child(control_view_soi).add_child(control_view_apsis).add_child(control_view_axes)
 		.id();
 	// navigation text
@@ -178,6 +194,18 @@ fn setup_ui(mut commands: Commands) {
 		.add_child(focused_planet_row)
 		.add_child(satellite_name)
 		.id();
+	// time text
+	let time_display = commands.spawn((
+		Text::new("t: 99999.9s"),
+		Node {
+			position_type: PositionType::Absolute,
+			top: Val::ZERO,
+			right: Val::ZERO,
+			padding: UiRect::axes(Val::Px(5.0), Val::Px(4.0)),
+			..default()
+		},
+	)).id();
+	// add UI resource
 	commands.insert_resource(UiElements{
 		parent_planet_name,
 		focused_planet_name,
@@ -188,6 +216,7 @@ fn setup_ui(mut commands: Commands) {
 		control_view_soi,
 		control_view_apsis,
 		control_view_axes,
+		time_display,
 	});
 }
 
@@ -278,6 +307,36 @@ fn update_planet_focus_ui(
 		text = elements.get_mut(handles.next_planet_name).unwrap();
 		text.0 = empty_string.clone();
 	}
+}
+
+/// Adds 1 second to the in game time every real world second
+fn increment_time(mut system_time: ResMut<SystemTime>, game_time: Res<Time>) {
+	system_time.seconds += game_time.delta_secs();
+}
+
+/// Adds or subtracts from the system timer based on user input
+fn process_time_controls(
+	mut system_time: ResMut<SystemTime>,
+	game_time: Res<Time>,
+	keyboard: Res<ButtonInput<KeyCode>>,
+) {
+	let delta = game_time.delta_secs();
+	if keyboard.pressed(INCREASE_TIME) {
+		system_time.seconds += TIME_CHANGE_SPEED * delta;
+	}
+	if keyboard.pressed(DECREASE_TIME) {
+		system_time.seconds -= TIME_CHANGE_SPEED * delta;
+	}
+}
+
+/// Updates the UI to show the current system time
+fn update_time_display(
+	mut labels: Query<&mut Text>,
+	elements: Res<UiElements>,
+	time: Res<SystemTime>
+) {
+	let mut time_label = labels.get_mut(elements.time_display).unwrap();
+	time_label.0 = format!("t: {:.1}", time.seconds);
 }
 
 fn process_camera_input(
@@ -397,7 +456,8 @@ fn update_camera_position(
 }
 
 fn draw_orbits(
-	mut gizmos: Gizmos, db: Res<Database>, camera_parents: Query<&CameraParent>,
+	mut gizmos: Gizmos, camera_parents: Query<&CameraParent>,
+	db: Res<Database>, system_time: Res<SystemTime>,
 ) {
 	let camera_parent = camera_parents.single();
 	let origin_body = camera_parent.centered_body;
@@ -410,32 +470,21 @@ fn draw_orbits(
 			let view_selected = camera_parent.view_orbit == OrbitViewMode::Selected && *handle == camera_parent.centered_body;
 			if view_all || view_heirarchy || view_selected {
 				let failure_msg = format!("Failed to find relative position between origin body {} and relative body {}", origin_body, parent_handle);
-				let parent_pos = db.relative_position(&origin_body, &parent_handle).expect(&failure_msg) * SCALE;
+				let parent_pos = db.relative_position(&origin_body, &parent_handle, system_time.seconds).expect(&failure_msg) * SCALE;
 				let mut points: Vec<(f32, Vec3)> = Vec::new();
+				let starting_mean_anomaly = db.mean_anomaly_at_time(handle, system_time.seconds);
 				// get orbit path
 				for i in 0..ORBIT_SEGMENTS {
-					let m = step * i as f32;
-					let m_1 = step * (i+1) as f32;
+					let mean_anomaly_offset = step * i as f32;
+					let m = starting_mean_anomaly + mean_anomaly_offset;
 					let pos = db.position_at_mean_anomaly(handle, m) * SCALE;
-					points.push((m, parent_pos + pos));
-					if m <= entry.mean_anomaly_at_epoch && m_1 >= entry.mean_anomaly_at_epoch {
-						points.push((
-							entry.mean_anomaly_at_epoch,
-							parent_pos + db.position_at_mean_anomaly(handle, entry.mean_anomaly_at_epoch) * SCALE
-						));
-					}
+					points.push((mean_anomaly_offset, parent_pos + pos));
 				}
 				for i in 0..points.len()-1 {
 					let (m_0, p_0) = points[i];
 					let (m_1, p_1) = points[i+1];
-					let mut t_0 = (m_0 - entry.mean_anomaly_at_epoch) / TAU;
-					let mut t_1 = (m_1 - entry.mean_anomaly_at_epoch) / TAU;
-					while t_0 < 0.0 {
-						t_0 += 1.0;
-					}
-					while t_1 <= 0.0 {
-						t_1 += 1.0;
-					}
+					let t_0 = m_0 / TAU;
+					let t_1 = m_1 / TAU;
 					let c_0 = ORBIT_COLOR.with_alpha(t_0.powi(2));
 					let c_1 = ORBIT_COLOR.with_alpha(t_1.powi(2));
 					gizmos.line_gradient(p_0, p_1, c_0, c_1);
@@ -453,12 +502,17 @@ fn draw_orbits(
 	}
 }
 
-fn draw_planets(mut gizmos: Gizmos, db: Res<Database>, camera_parents: Query<&CameraParent>) {
+fn draw_planets(
+	mut gizmos: Gizmos,
+	db: Res<Database>, time: Res<SystemTime>,
+	camera_parents: Query<&CameraParent>,
+) {
 	let camera_parent = camera_parents.single();
 	let centered_body = camera_parent.centered_body;
 	for (handle, entry) in db.iter() {
+
+		let pos = db.relative_position(&centered_body, handle, time.seconds).unwrap() * SCALE;
 		let info = entry.info.clone();
-		let pos = db.relative_position(&centered_body, handle).unwrap() * SCALE;
 		let rot = Quat::from_axis_angle(Vec3::X, info.axial_tilt_rad());
 		let iso = Isometry3d::new(pos, rot);
 		// info!("Scale radius: {} units", info.radius_avg_km() * scale);
@@ -478,6 +532,7 @@ fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
 		.insert_resource(Database::default().with_solar_system())
+		.insert_resource(SystemTime::default())
 		.add_systems(Startup, (setup_camera, setup_ui))
 		.add_systems(Update, (
 			process_visibility_input,
@@ -487,6 +542,9 @@ fn main() {
 			update_camera_position,
 			update_controls_ui.after(process_visibility_input),
 			update_planet_focus_ui.after(process_navigation_controls),
+			update_time_display,
+			increment_time.before(update_time_display),
+			process_time_controls.before(update_time_display),
 		))
 		.run();
 }
