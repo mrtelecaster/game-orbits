@@ -109,28 +109,38 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 	/// life, especially with moons of giant planets. This will be corrected eventually but for now
 	/// it's enough that the planets have eccentrity and inclination at all, that are authentic to
 	/// real life even if they're not strictly perfectly accurate.
-	pub fn with_solar_system(self) -> Self {
-		self.with_sol()
-			.with_mercury()
-			.with_venus()
-			.with_earth()
-			.with_mars()
-			.with_jupiter()
-			.with_saturn()
-			.with_uranus()
-			.with_neptune()
-			.with_dwarf_planets()
+	pub fn add_solar_system(&mut self) {
+		self.add_sol();
+		self.add_mercury();
+		self.add_venus();
+		self.add_earth();
+		self.add_mars();
+		self.add_jupiter();
+		self.add_saturn();
+		self.add_uranus();
+		self.add_neptune();
+		self.add_dwarf_planets();
+	}
+	/// populates the database with celestial bodies from our solar system
+	/// 
+	/// Due to some inconsistencies in the data sources used to hard code these, the orientations of
+	/// orbits and the bodies exact position along the orbit are not necessarily accurate to real
+	/// life, especially with moons of giant planets. This will be corrected eventually but for now
+	/// it's enough that the planets have eccentrity and inclination at all, that are authentic to
+	/// real life even if they're not strictly perfectly accurate.
+	pub fn with_solar_system(mut self) -> Self {
+		self.add_solar_system();
+		self
 	}
 	/// Adds our sun to the database
-	pub fn with_sol(mut self) -> Self {
+	pub fn add_sol(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let sun_info: Body<T> = Body::new_sol();
 		let sun_entry = DatabaseEntry::new(sun_info, "Sol").with_scale(T::from_f64(1.0 / 100_000_000.0).unwrap());
 		self.add_entry(sun_handle.clone(), sun_entry);
-		self
 	}
 	/// Adds the planet mercury to the database
-	pub fn with_mercury(mut self) -> Self {
+	pub fn add_mercury(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let mercury_handle = H::from_u16(handles::HANDLE_MERCURY).unwrap();
 		let one = T::from_f32(1.0).unwrap();
@@ -153,10 +163,9 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(sun_handle.clone(), mercury_orbit)
 			.with_mean_anomaly_deg(T::from_f64(174.796).unwrap());
 		self.add_entry(mercury_handle, mercury_entry);
-		self
 	}
 	/// Adds the planet venus to the database
-	pub fn with_venus(mut self) -> Self {
+	pub fn add_venus(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let venus_handle = H::from_u16(handles::HANDLE_VENUS).unwrap();
 		let venus_info: Body<T> = Body::default()
@@ -173,10 +182,9 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(sun_handle.clone(), venus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(	50.115).unwrap());
 		self.add_entry(venus_handle, venus_entry);
-		self
 	}
 	/// Adds the Earth and its moon to the database
-	pub fn with_earth(mut self) -> Self {
+	pub fn add_earth(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		let earth_handle = H::from_u16(handles::HANDLE_EARTH).unwrap();
 		let earth_info: Body<T> = Body::new_earth();
@@ -204,10 +212,9 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(earth_handle.clone(), moon_orbit)
 			.with_mean_anomaly_deg(T::from_f64(90.0).unwrap());
 		self.add_entry(moon_handle, moon_entry);
-		self
 	}
 	/// Adds the planet Mars and its two moons to the database
-	pub fn with_mars(mut self) -> Self {
+	pub fn add_mars(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		// mars
 		let mars_handle = H::from_u16(handles::HANDLE_MARS).unwrap();
@@ -255,13 +262,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(mars_handle.clone(), deimos_orbit)
 			.with_mean_anomaly_deg(T::from_f64(270.0).unwrap());
 		self.add_entry(deimos_handle, deimos_entry);
-		// return
-		self
 	}
 	/// Adds the planet jupiter to the database with a selection of its moons
 	/// 
 	/// Referencing wikipedia's [list of Jupiter's moons](https://en.wikipedia.org/wiki/Moons_of_Jupiter#List)
-	pub fn with_jupiter(mut self) -> Self {
+	pub fn add_jupiter(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		// jupiter
 		let jupiter_handle = H::from_u16(handles::HANDLE_JUPITER).unwrap();
@@ -474,13 +479,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(jupiter_handle.clone(), leda_orbit)
 			.with_mean_anomaly_deg(T::from_f64(137.02571).unwrap());
 		self.add_entry(leda_handle, leda_entry);
-		// return
-		self
 	}
 	/// Adds the planet Saturn to the database with a selection of its moons
 	/// 
 	/// References wikipedia's [list of Saturn's moons](https://en.wikipedia.org/wiki/Moons_of_Saturn#List)
-	pub fn with_saturn(mut self) -> Self {
+	pub fn add_saturn(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		// saturn
 		let saturn_handle = H::from_u16(handles::HANDLE_SATURN).unwrap();
@@ -648,13 +651,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(saturn_handle.clone(), janus_orbit)
 			.with_mean_anomaly_deg(T::from_f64(108.701283931732).unwrap());
 		self.add_entry(janus_handle, janus_entry);
-		// return
-		self
 	}
 	/// Adds Uranus and a selection of its moons to the database
 	/// 
 	/// References [Wikipedia's list of Uranian moons](https://en.wikipedia.org/wiki/Moons_of_Uranus#List)
-	pub fn with_uranus(mut self) -> Self {
+	pub fn add_uranus(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		// Uranus
 		let uranus_handle = H::from_u16(handles::HANDLE_URANUS).unwrap();
@@ -747,13 +748,11 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(uranus_handle.clone(), miranda_orbit)
 			.with_mean_anomaly_deg(T::from_f64(143.0330121).unwrap());
 		self.add_entry(miranda_handle, miranda_entry);
-		// return
-		self
 	}
 	/// Adds Neptune and a selection of its moons to the database
 	/// 
 	/// References [Wikipedia's list of Neptunian moons](https://en.wikipedia.org/wiki/Moons_of_Neptune#List)
-	pub fn with_neptune(mut self) -> Self {
+	pub fn add_neptune(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		// saturn
 		let neptune_handle = H::from_u16(handles::HANDLE_NEPTUNE).unwrap();
@@ -876,10 +875,8 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(neptune_handle.clone(), larissa_orbit)
 			.with_mean_anomaly_deg(T::from_f64(428.613425343462).unwrap());
 		self.add_entry(larissa_handle, larissa_entry);
-		// return
-		self
 	}
-	pub fn with_dwarf_planets(mut self) -> Self {
+	pub fn add_dwarf_planets(&mut self) {
 		let sun_handle = H::from_u16(handles::HANDLE_SOL).unwrap();
 		// Eris
 		let eris_handle = H::from_u16(handles::HANDLE_ERIS).unwrap();
@@ -956,8 +953,6 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			.with_parent(haumea_handle.clone(), namaka_orbit)
 			.with_mean_anomaly_deg(T::from_f64(178.5).unwrap());
 		self.add_entry(namaka_handle, namaka_entry);
-		// return
-		self
 	}
 	/// Adds a new entry to the database
 	pub fn add_entry(&mut self, handle: H, entry: DatabaseEntry<H, T>) {

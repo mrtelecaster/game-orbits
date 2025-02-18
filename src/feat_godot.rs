@@ -1,16 +1,20 @@
-use godot::{prelude::*, builtin::Vector3, classes::{INode3D, Node3D}};
+use godot::{prelude::*, builtin::Vector3, classes::{INode, Node}};
+use crate::Database;
 
 pub struct OrbitExtension;
-
 #[gdextension]
 unsafe impl ExtensionLibrary for OrbitExtension {}
 
 
+fn vec_nalgebra_to_godot(input: nalgebra::Vector3<f32>) -> godot::builtin::Vector3 {
+	godot::builtin::Vector3::new(input.x, input.y, input.z)
+}
+
+
 #[derive(GodotClass)]
-#[class(base=Node3D)]
-struct TestBody {
-	spin_speed: f64,
-	base: Base<Node3D>,
+#[class(base=Node)]
+struct GodotPlanetDatabase {
+	database: Database<i64, f32>,
 }
 #[godot_api]
 impl INode for GodotPlanetDatabase {
@@ -23,6 +27,7 @@ impl GodotPlanetDatabase {
 	#[func]
 	pub fn add_solar_system(&mut self) {
 		self.database.add_sol();
+		self.database.add_earth();
 	}
 	#[func]
 	pub fn relative_position(&self, origin: i64, relative: i64, time: f32) -> Vector3 {
