@@ -4,8 +4,8 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-bevy = {version="0.15.1", optional=true}
-godot = {version="0.2.2", optional=true}
+bevy = {version="0.15.2", optional=true}
+godot = {version="0.2.3", optional=true}
 nalgebra = "*"
 num-traits = "*"
 
