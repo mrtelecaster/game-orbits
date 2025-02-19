@@ -959,11 +959,12 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		self.bodies.insert(handle, entry);
 	}
 	/// Gets the entry from the database with the given handle
-	pub fn get_entry(&self, handle: &H) -> &DatabaseEntry<H, T> {
-		self.bodies.get(handle).unwrap()
+	pub fn get_entry(&self, handle: &H) -> &DatabaseEntry<H, T> where H: Debug {
+		let error_msg = format!("No body in database with ID {:?}", handle);
+		self.bodies.get(handle).expect(&error_msg)
 	}
 	/// Gets the position of the given body at the given time since epoch in seconds
-	pub fn position_at_mean_anomaly(&self, handle: &H, mean_anomaly: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
+	pub fn position_at_mean_anomaly(&self, handle: &H, mean_anomaly: T) -> Vector3<T> where H: Debug, T: RealField + SimdValue + SimdRealField {
 		let zero = T::from_f32(0.0).unwrap();
 		let one = T::from_f32(1.0).unwrap();
 		let two = T::from_f32(2.0).unwrap();
@@ -988,7 +989,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			return Vector3::new(zero, zero, zero);
 		}
 	}
-	pub fn position_at_time(&self, handle: &H, time: T) -> Vector3<T> where T: RealField {
+	pub fn position_at_time(&self, handle: &H, time: T) -> Vector3<T> where H: Debug, T: RealField {
 		let orbiting_body = self.bodies.get(handle).unwrap();
 		if orbiting_body.orbit.is_some() {
 			let mean_anomaly = self.mean_anomaly_at_time(handle, time);
@@ -1052,7 +1053,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		}
 		return None;
 	}
-	pub fn absolute_position_at_time(&self, handle: &H, time: T) -> Vector3<T> where T: RealField + SimdValue + SimdRealField {
+	pub fn absolute_position_at_time(&self, handle: &H, time: T) -> Vector3<T> where H: Debug, T: RealField + SimdValue + SimdRealField {
 		let zero = T::from_f32(0.0).unwrap();
 		if let Some(entry) = self.bodies.get(&handle) {
 			let parent_position = match &entry.parent {
@@ -1078,7 +1079,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		satellites
 	}
 	/// Get the heirarchy of parent bodies of the input body
-	pub fn get_parents(&self, body: &H) -> Vec<H> {
+	pub fn get_parents(&self, body: &H) -> Vec<H> where H: Debug {
 		let body_entry = self.get_entry(&body);
 		if let Some(parent_handle) = &body_entry.parent {
 			let mut heirarchy = self.get_parents(parent_handle);
@@ -1089,7 +1090,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		}
 	}
 	/// Gets the combined mass of a body and all its satellites
-	pub fn get_combined_mass_kg(&self, body: &H) -> T where H: Ord {
+	pub fn get_combined_mass_kg(&self, body: &H) -> T where H: Debug + Ord {
 		let body_entry = self.get_entry(body);
 		let mut total_mass = body_entry.info.mass_kg();
 		for satellite_handle in self.get_satellites(body) {
@@ -1098,7 +1099,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 		return total_mass;
 	}
 	/// Calculate the radius of the sphere of influence of the body with the given handle
-	pub fn radius_soi(&self, handle: &H) -> T where H: Ord {
+	pub fn radius_soi(&self, handle: &H) -> T where H: Debug + Ord {
 		let orbiting_body = self.bodies.get(&handle).unwrap();
 		let orbiting_body_info = orbiting_body.info.clone();
 		let orbiting_body_mass = self.get_combined_mass_kg(handle);
@@ -1112,7 +1113,7 @@ impl<H, T> Database<H, T> where H: Clone + Eq + Hash + FromPrimitive, T: Clone +
 			return orbiting_body_info.distance_of_gravity(minimum_gravity);
 		}
 	}
-	pub fn mean_anomaly_at_time(&self, handle: &H, time: T) -> T {
+	pub fn mean_anomaly_at_time(&self, handle: &H, time: T) -> T where H: Debug {
 		let orbiting_entry = self.get_entry(handle);
 		if let Some(parent_handle) = &orbiting_entry.parent {
 			let orbit = orbiting_entry.orbit.clone().unwrap();
