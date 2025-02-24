@@ -1,4 +1,4 @@
-use godot::{prelude::*, builtin::Vector3, classes::{INode, Node}};
+use godot::{prelude::*, builtin::{Array, Vector3}, classes::{INode, Node}};
 use crate::Database;
 
 pub struct OrbitExtension;
@@ -35,5 +35,14 @@ impl GodotPlanetDatabase {
 	#[func]
 	pub fn radius_soi(&self, handle: i64) -> f32 {
 		self.database.radius_soi(&handle)
+	}
+	#[func]
+	pub fn get_satellites(&self, handle: i64) -> Array<i64> {
+		let satellites = self.database.get_satellites(&handle);
+		let mut output = Array::new();
+		for handle in satellites {
+			output.push(handle);
+		}
+		return output;
 	}
 }
