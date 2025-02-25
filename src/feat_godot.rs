@@ -33,6 +33,10 @@ impl GodotPlanetDatabase {
 		vec_nalgebra_to_godot(self.database.relative_position(&origin, &relative, time).unwrap())
 	}
 	#[func]
+	pub fn axial_tilt_rad(&self, handle: i64) -> f32 {
+		self.database.get_entry(&handle).info.axial_tilt_rad()
+	}
+	#[func]
 	pub fn radius_soi(&self, handle: i64) -> f32 {
 		self.database.radius_soi(&handle)
 	}
