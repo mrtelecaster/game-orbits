@@ -1,5 +1,5 @@
 use godot::{prelude::*, builtin::{Array, Vector3}, classes::{INode, Node}};
-use crate::Database;
+use crate::{Body, Database, DatabaseEntry, OrbitalElements};
 
 pub struct OrbitExtension;
 #[gdextension]
@@ -39,6 +39,13 @@ impl GodotPlanetDatabase {
 	#[func]
 	pub fn radius_soi(&self, handle: i64) -> f32 {
 		self.database.radius_soi(&handle)
+	}
+	#[func]
+	pub fn add_satellite(&mut self, handle: i64, parent: i64, name: String, mass_kg: f32, radius_km: f32, orbit_radius_km: f32){
+		let info = Body::new(mass_kg, radius_km, radius_km, 0.0);
+		let orbit = OrbitalElements::default().with_semimajor_axis_km(orbit_radius_km);
+		let entry = DatabaseEntry::new(info, name).with_parent(parent, orbit);
+		self.database.add_entry(handle, entry);
 	}
 	#[func]
 	pub fn get_satellites(&self, handle: i64) -> Array<i64> {
